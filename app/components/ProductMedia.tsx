@@ -1,9 +1,15 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useRef } from 'react'
 
-export default function ProductMedia() {
-  const [preview, setPreview] = useState<{ type: 'image' | 'video'; src: string } | null>(null)
+export type ProductMediaValue = { type: 'image' | 'video'; src: string } | null
+
+type Props = {
+  value: ProductMediaValue
+  onChange: (value: ProductMediaValue) => void
+}
+
+export default function ProductMedia({ value, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -11,17 +17,17 @@ export default function ProductMedia() {
     if (!file) return
     const src = URL.createObjectURL(file)
     const type = file.type.startsWith('video/') ? 'video' : 'image'
-    setPreview({ type, src })
+    onChange({ type, src })
   }
 
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-zinc-700">Product Media</label>
-        {preview && (
+        {value && (
           <button
             onClick={() => {
-              setPreview(null)
+              onChange(null)
               if (inputRef.current) inputRef.current.value = ''
             }}
             className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors"
@@ -33,12 +39,12 @@ export default function ProductMedia() {
 
       <div className="relative aspect-video bg-zinc-50 border border-zinc-200 rounded-xl overflow-hidden group shadow-sm">
         {/* Content: either uploaded file or placeholder */}
-        {preview ? (
-          preview.type === 'image' ? (
+        {value ? (
+          value.type === 'image' ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview.src} alt="Product media" className="w-full h-full object-cover" />
+            <img src={value.src} alt="Product media" className="w-full h-full object-cover" />
           ) : (
-            <video src={preview.src} className="w-full h-full object-cover" muted loop autoPlay />
+            <video src={value.src} className="w-full h-full object-cover" muted loop autoPlay />
           )
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-zinc-400">

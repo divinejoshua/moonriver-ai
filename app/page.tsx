@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import VideoPreview from './components/VideoPreview'
-import ProductMedia from './components/ProductMedia'
+import ProductMedia, { type ProductMediaValue } from './components/ProductMedia'
 
 const AVATARS = [
   { id: 0, name: 'Alex', initials: 'AX', color: 'bg-violet-500' },
@@ -48,6 +48,7 @@ export default function Home() {
   const [selectedVoice, setSelectedVoice] = useState('sarah')
   const [selectedMusic, setSelectedMusic] = useState('upbeat')
   const [script, setScript] = useState(SAMPLE_SCRIPT)
+  const [productMedia, setProductMedia] = useState<ProductMediaValue>(null)
 
   function handleGenerate() {
     setStep('generating')
@@ -251,11 +252,11 @@ export default function Home() {
               </section>
 
               {/* Product media */}
-              <ProductMedia />
+              <ProductMedia value={productMedia} onChange={setProductMedia} />
             </div>
 
             {/* ── Right: Preview ── */}
-            <VideoPreview selectedAvatar={AVATARS[selectedAvatar]} />
+            <VideoPreview selectedAvatar={AVATARS[selectedAvatar]} productMedia={productMedia} />
           </div>
         </div>
       )}
