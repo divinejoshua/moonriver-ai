@@ -1,10 +1,10 @@
+import Image from 'next/image'
 import type { ProductMediaValue } from './ProductMedia'
 
 type Avatar = {
   id: number
   name: string
-  initials: string
-  color: string
+  src: string
 }
 
 type Props = {
@@ -14,12 +14,12 @@ type Props = {
 
 export default function VideoPreview({ selectedAvatar, productMedia }: Props) {
   return (
-    <div className="w-72 xl:w-80 border-l border-zinc-200 bg-white px-6 py-6 flex flex-col items-center gap-4 shrink-0">
+    <div className="w-[38%] border-l border-zinc-200 bg-white px-6 py-6 flex flex-col items-center gap-4 overflow-hidden shrink-0">
       <span className="text-sm font-medium text-zinc-500">Preview</span>
 
       {/* Portrait phone frame */}
       <div
-        className="relative w-52 rounded-[2rem] border-[3px] border-zinc-300 overflow-hidden bg-zinc-100 shadow-xl shadow-zinc-200"
+        className="relative w-72 max-h-[calc(100vh-12rem)] rounded-[2rem] border-[3px] border-zinc-300 overflow-hidden bg-zinc-100 shadow-xl shadow-zinc-200"
         style={{ aspectRatio: '9/16' }}
       >
         {/* Top segment — Product media (60%) */}
@@ -64,15 +64,15 @@ export default function VideoPreview({ selectedAvatar, productMedia }: Props) {
 
         {/* Bottom segment — Avatar voiceover (40%) */}
         <div
-          className="absolute bottom-0 left-0 right-0 bg-white flex flex-col items-center justify-center gap-1.5"
+          className="absolute bottom-0 left-0 right-0 bg-zinc-100 overflow-hidden"
           style={{ height: '40%' }}
         >
-          <div
-            className={`w-12 h-12 rounded-full ${selectedAvatar.color} flex items-center justify-center text-white text-sm font-bold shadow-md`}
-          >
-            {selectedAvatar.initials}
-          </div>
-          <span className="text-[10px] text-zinc-400">{selectedAvatar.name}</span>
+          <Image
+            src={selectedAvatar.src}
+            alt={selectedAvatar.name}
+            fill
+            className="object-cover"
+          />
         </div>
       </div>
 

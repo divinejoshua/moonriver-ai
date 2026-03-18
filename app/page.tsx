@@ -1,16 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import VideoPreview from './components/VideoPreview'
 import ProductMedia, { type ProductMediaValue } from './components/ProductMedia'
 
 const AVATARS = [
-  { id: 0, name: 'Alex', initials: 'AX', color: 'bg-violet-500' },
-  { id: 1, name: 'Sarah', initials: 'SR', color: 'bg-pink-500' },
-  { id: 2, name: 'Marcus', initials: 'MK', color: 'bg-blue-500' },
-  { id: 3, name: 'Emma', initials: 'EM', color: 'bg-emerald-500' },
-  { id: 4, name: 'Carlos', initials: 'CL', color: 'bg-orange-500' },
-  { id: 5, name: 'Yuki', initials: 'YK', color: 'bg-rose-500' },
+  { id: 0, name: 'Marcus', src: '/avatars/one.png' },
+  { id: 1, name: 'Sophie', src: '/avatars/two.png' },
+  { id: 2, name: 'Jade', src: '/avatars/three.png' },
 ]
 
 const VOICES = [
@@ -56,7 +54,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col">
+    <div className="h-screen bg-zinc-50 text-zinc-900 flex flex-col overflow-hidden">
       {/* ── Header ── */}
       <header className="border-b border-zinc-200 bg-white px-6 py-4 flex items-center gap-3 shrink-0">
         <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center">
@@ -229,23 +227,27 @@ export default function Home() {
               {/* Avatar selection */}
               <section className="space-y-3">
                 <label className="text-sm font-medium text-zinc-700">Avatar</label>
-                <div className="grid grid-cols-6 gap-2">
+                <div className="flex gap-3">
                   {AVATARS.map((avatar) => (
                     <button
                       key={avatar.id}
                       onClick={() => setSelectedAvatar(avatar.id)}
-                      className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl transition-all ${
+                      className={`flex flex-col items-center gap-2 py-3 px-4 rounded-xl transition-all ${
                         selectedAvatar === avatar.id
                           ? 'bg-violet-50 ring-2 ring-violet-500'
                           : 'hover:bg-zinc-100'
                       }`}
                     >
-                      <div
-                        className={`w-11 h-11 rounded-full ${avatar.color} flex items-center justify-center text-white text-xs font-bold shadow-md`}
-                      >
-                        {avatar.initials}
+                      <div className="w-16 h-20 rounded-xl overflow-hidden shadow-md">
+                        <Image
+                          src={avatar.src}
+                          alt={avatar.name}
+                          width={64}
+                          height={80}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <span className="text-[11px] text-zinc-500">{avatar.name}</span>
+                      <span className="text-xs text-zinc-600 font-medium">{avatar.name}</span>
                     </button>
                   ))}
                 </div>
