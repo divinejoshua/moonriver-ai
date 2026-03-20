@@ -47,10 +47,43 @@ export default function Home() {
   const [selectedMusic, setSelectedMusic] = useState('upbeat')
   const [script, setScript] = useState(SAMPLE_SCRIPT)
   const [productMedia, setProductMedia] = useState<ProductMediaValue>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  function handleGenerate() {
+  async function handleGenerate() {
+    if (!url.trim()) return
+    setError(null)
     setStep('generating')
-    setTimeout(() => setStep('review'), 1500)
+    try {
+      const res = await fetch('/api/generate-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to generate script')
+      setScript(data.script)
+      setStep('review')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setStep('input')
+    }
+  }
+
+  async function handleRegenerate() {
+    if (!url.trim()) return
+    setError(null)
+    try {
+      const res = await fetch('/api/generate-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to regenerate script')
+      setScript(data.script)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+    }
   }
 
   return (
@@ -102,6 +135,9 @@ export default function Home() {
               </button>
             </div>
 
+            {error && (
+              <p className="text-xs text-red-500 text-center">{error}</p>
+            )}
             <p className="text-xs text-zinc-400">
               Works with Shopify, Amazon, landing pages, and more
             </p>
@@ -159,7 +195,10 @@ export default function Home() {
               <section className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-zinc-700">Voiceover Script</label>
-                  <button className="text-xs text-violet-600 hover:text-violet-500 transition-colors">
+                  <button
+                    onClick={handleRegenerate}
+                    className="text-xs text-violet-600 hover:text-violet-500 transition-colors"
+                  >
                     Regenerate
                   </button>
                 </div>
