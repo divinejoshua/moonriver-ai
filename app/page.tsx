@@ -55,7 +55,7 @@ const INITIAL_STAGES: Stage[] = [
   {
     id: 'lipsync',
     label: 'Generating lipsync',
-    description: 'Animating avatar with VEED Fabric 1.0',
+    description: 'Adding lipsync to avatar',
     status: 'pending',
   },
 ]
@@ -338,11 +338,10 @@ export default function Home() {
                     <button
                       key={avatar.id}
                       onClick={() => setSelectedAvatar(avatar.id)}
-                      className={`flex flex-col items-center gap-2 py-3 px-4 rounded-xl transition-all ${
-                        selectedAvatar === avatar.id
+                      className={`flex flex-col items-center gap-2 py-3 px-4 rounded-xl transition-all ${selectedAvatar === avatar.id
                           ? 'bg-violet-50 ring-2 ring-violet-500'
                           : 'hover:bg-zinc-100'
-                      }`}
+                        }`}
                     >
                       <div className="w-16 h-20 rounded-xl overflow-hidden shadow-md">
                         <Image
@@ -407,8 +406,8 @@ export default function Home() {
                   {allDone
                     ? 'Your lipsync video and voiceover are ready below.'
                     : hasError
-                    ? 'One or more stages failed. Go back and try again.'
-                    : 'Sit tight while we build each asset.'}
+                      ? 'One or more stages failed. Go back and try again.'
+                      : 'Sit tight while we build each asset.'}
                 </p>
               </div>
 
@@ -442,16 +441,14 @@ export default function Home() {
 
                     {/* Stage info */}
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium ${
-                        stage.status === 'pending' ? 'text-zinc-400' :
-                        stage.status === 'error' ? 'text-red-600' :
-                        'text-zinc-900'
-                      }`}>
+                      <p className={`text-sm font-medium ${stage.status === 'pending' ? 'text-zinc-400' :
+                          stage.status === 'error' ? 'text-red-600' :
+                            'text-zinc-900'
+                        }`}>
                         {stage.label}
                       </p>
-                      <p className={`text-xs mt-0.5 ${
-                        stage.status === 'pending' ? 'text-zinc-300' : 'text-zinc-500'
-                      }`}>
+                      <p className={`text-xs mt-0.5 ${stage.status === 'pending' ? 'text-zinc-300' : 'text-zinc-500'
+                        }`}>
                         {stage.description}
                       </p>
                     </div>
