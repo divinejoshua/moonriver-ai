@@ -161,8 +161,8 @@ export default function GeneratingPage() {
               {allDone
                 ? 'Your lipsync video and voiceover are ready below.'
                 : hasError
-                ? 'One or more stages failed. Go back and try again.'
-                : 'Sit tight while we build each asset.'}
+                  ? 'One or more stages failed. Go back and try again.'
+                  : 'Sit tight while we build each asset.'}
             </p>
           </div>
 
@@ -196,15 +196,13 @@ export default function GeneratingPage() {
 
                 {/* Stage info */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${
-                    stage.status === 'pending' ? 'text-zinc-400' :
-                    stage.status === 'error' ? 'text-red-600' : 'text-zinc-900'
-                  }`}>
+                  <p className={`text-sm font-medium ${stage.status === 'pending' ? 'text-zinc-400' :
+                      stage.status === 'error' ? 'text-red-600' : 'text-zinc-900'
+                    }`}>
                     {stage.label}
                   </p>
-                  <p className={`text-xs mt-0.5 ${
-                    stage.status === 'pending' ? 'text-zinc-300' : 'text-zinc-500'
-                  }`}>
+                  <p className={`text-xs mt-0.5 ${stage.status === 'pending' ? 'text-zinc-300' : 'text-zinc-500'
+                    }`}>
                     {stage.description}
                   </p>
                 </div>
@@ -260,7 +258,7 @@ export default function GeneratingPage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-zinc-900">Lipsync Preview</p>
-                  <p className="text-xs text-zinc-500">{avatar.name} · VEED Fabric 1.0</p>
+                  <p className="text-xs text-zinc-500">{avatar.name} · Creator voice over</p>
                 </div>
               </div>
               <video controls src={videoUrl} className="w-full rounded-xl" />
