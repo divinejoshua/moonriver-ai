@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     body: JSON.stringify({
       text: script,
       model_id: 'eleven_monolingual_v1',
-      voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+      voice_settings: { stability: 0.5, similarity_boost: 0.75, speed: 1.2 },
     }),
   })
 
