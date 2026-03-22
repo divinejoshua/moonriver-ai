@@ -102,7 +102,7 @@ export default function Home() {
             <path d="M15 10l4.553-2.277A1 1 0 0121 8.764v6.472a1 1 0 01-1.447.894L15 14v-4zM3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
           </svg>
         </div>
-        <span className="font-semibold text-base tracking-tight text-zinc-900">UGC Maker</span>
+        <span className="font-semibold text-base tracking-tight text-zinc-900">Moonriver</span>
       </header>
 
       {/* ── Step 1: URL input ── */}

@@ -133,7 +133,7 @@ export default function GeneratingPage() {
             <path d="M15 10l4.553-2.277A1 1 0 0121 8.764v6.472a1 1 0 01-1.447.894L15 14v-4zM3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
           </svg>
         </div>
-        <span className="font-semibold text-base tracking-tight">UGC Maker</span>
+        <span className="font-semibold text-base tracking-tight">Moonriver</span>
 
         <div className="ml-auto">
           <button
@@ -197,7 +197,7 @@ export default function GeneratingPage() {
                 {/* Stage info */}
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium ${stage.status === 'pending' ? 'text-zinc-400' :
-                      stage.status === 'error' ? 'text-red-600' : 'text-zinc-900'
+                    stage.status === 'error' ? 'text-red-600' : 'text-zinc-900'
                     }`}>
                     {stage.label}
                   </p>

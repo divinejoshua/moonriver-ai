@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UGC Maker — AI Video Generator",
-  description: "Generate UGC product review videos in seconds from a product link.",
+  title: "Moonriver — AI Video Generator",
+  description: "Generate product review videos in seconds from a product link.",
 };
 
 export default function RootLayout({
