@@ -49,13 +49,13 @@ const INITIAL_STAGES: Stage[] = [
   {
     id: 'audio',
     label: 'Generating voiceover',
-    description: 'Synthesising speech with Eleven Labs',
+    description: 'Synthesising speech',
     status: 'pending',
   },
   {
     id: 'lipsync',
     label: 'Generating lipsync',
-    description: 'Adding lipsync to avatar',
+    description: 'Adding lip sync to avatar',
     status: 'pending',
   },
 ]
@@ -339,8 +339,8 @@ export default function Home() {
                       key={avatar.id}
                       onClick={() => setSelectedAvatar(avatar.id)}
                       className={`flex flex-col items-center gap-2 py-3 px-4 rounded-xl transition-all ${selectedAvatar === avatar.id
-                          ? 'bg-violet-50 ring-2 ring-violet-500'
-                          : 'hover:bg-zinc-100'
+                        ? 'bg-violet-50 ring-2 ring-violet-500'
+                        : 'hover:bg-zinc-100'
                         }`}
                     >
                       <div className="w-16 h-20 rounded-xl overflow-hidden shadow-md">
@@ -442,8 +442,8 @@ export default function Home() {
                     {/* Stage info */}
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium ${stage.status === 'pending' ? 'text-zinc-400' :
-                          stage.status === 'error' ? 'text-red-600' :
-                            'text-zinc-900'
+                        stage.status === 'error' ? 'text-red-600' :
+                          'text-zinc-900'
                         }`}>
                         {stage.label}
                       </p>
