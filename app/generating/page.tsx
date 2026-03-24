@@ -43,6 +43,12 @@ const INITIAL_STAGES: Stage[] = [
     description: 'Combining product media with lipsync',
     status: 'pending',
   },
+  {
+    id: 'caption',
+    label: 'Adding captions',
+    description: 'Burning voiceover script as captions',
+    status: 'pending',
+  },
 ]
 
 export default function GeneratingPage() {
@@ -65,22 +71,22 @@ export default function GeneratingPage() {
       return
     }
 
-    const { script, selectedAvatar, productMediaBase64, productMediaType } = JSON.parse(raw) as {
+    const { script, selectedAvatar, productMediaUrl, productMediaType } = JSON.parse(raw) as {
       script: string
       selectedAvatar: number
-      productMediaBase64: string
+      productMediaUrl: string
       productMediaType: 'image' | 'video'
     }
 
     setAvatarId(selectedAvatar)
-    run(script, selectedAvatar, productMediaBase64, productMediaType)
+    run(script, selectedAvatar, productMediaUrl, productMediaType)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function run(
     script: string,
     selectedAvatar: number,
-    productMediaBase64: string,
+    productMediaUrl: string,
     productMediaType: 'image' | 'video',
   ) {
     // Stage: audio
@@ -153,26 +159,44 @@ export default function GeneratingPage() {
 
     // Stage: merge
     setStageStatus('merge', 'active')
+    let mergedUrl: string | null = null
     try {
       const res = await fetch('/api/merge-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lipsyncVideoUrl,
-          productMediaBase64,
-          productMediaType,
-        }),
+        body: JSON.stringify({ lipsyncVideoUrl, productMediaUrl, productMediaType }),
       })
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.error ?? 'Failed to merge video')
       }
       const data = await res.json()
-      setMergedVideoUrl(data.mergedVideoUrl)
+      mergedUrl = data.mergedVideoUrl
       setStageStatus('merge', 'done')
     } catch (err) {
       setStageStatus('merge', 'error')
       setError(err instanceof Error ? err.message : 'Video merge failed')
+      return
+    }
+
+    // Stage: caption
+    setStageStatus('caption', 'active')
+    try {
+      const res = await fetch('/api/caption-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl: mergedUrl, script }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error ?? 'Failed to add captions')
+      }
+      const data = await res.json()
+      setMergedVideoUrl(data.captionedVideoUrl)
+      setStageStatus('caption', 'done')
+    } catch (err) {
+      setStageStatus('caption', 'error')
+      setError(err instanceof Error ? err.message : 'Caption generation failed')
     }
   }
 

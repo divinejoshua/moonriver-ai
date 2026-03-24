@@ -68,22 +68,11 @@ export default function Home() {
     }
   }
 
-  async function handleCreateVideo() {
+  function handleCreateVideo() {
     if (!productMedia) return
-
-    // Convert blob URL to base64 so it can be passed via sessionStorage to /generating
-    const res = await fetch(productMedia.src)
-    const blob = await res.blob()
-    const productMediaBase64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
-
     sessionStorage.setItem(
       'ugc_job',
-      JSON.stringify({ script, selectedAvatar, productMediaBase64, productMediaType: productMedia.type }),
+      JSON.stringify({ script, selectedAvatar, productMediaUrl: productMedia.s3Url, productMediaType: productMedia.type }),
     )
     router.push('/generating')
   }

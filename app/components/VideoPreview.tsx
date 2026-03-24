@@ -30,9 +30,9 @@ export default function VideoPreview({ selectedAvatar, productMedia }: Props) {
           {productMedia ? (
             productMedia.type === 'image' ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={productMedia.src} alt="Product" className="w-full h-full object-cover" />
+              <img src={productMedia.previewSrc} alt="Product" className="w-full h-full object-cover" />
             ) : (
-              <video src={productMedia.src} className="w-full h-full object-cover" muted loop autoPlay />
+              <video src={productMedia.previewSrc} className="w-full h-full object-cover" muted loop autoPlay />
             )
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2">

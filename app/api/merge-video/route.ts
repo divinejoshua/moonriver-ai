@@ -19,52 +19,50 @@ const MIME_TO_EXT: Record<string, string> = {
 }
 
 export async function POST(req: Request) {
-  const { lipsyncVideoUrl, productMediaBase64, productMediaType } = await req.json() as {
+  const { lipsyncVideoUrl, productMediaUrl, productMediaType } = await req.json() as {
     lipsyncVideoUrl: string
-    productMediaBase64: string
+    productMediaUrl: string
     productMediaType: 'image' | 'video'
   }
 
-  if (!lipsyncVideoUrl || !productMediaBase64 || !productMediaType) {
+  if (!lipsyncVideoUrl || !productMediaUrl || !productMediaType) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  // Determine file extension from the data URI MIME type
-  const mimeMatch = productMediaBase64.match(/^data:([^;]+);base64,/)
-  const mimeType = mimeMatch?.[1] ?? (productMediaType === 'video' ? 'video/mp4' : 'image/png')
-  const ext = MIME_TO_EXT[mimeType] ?? (productMediaType === 'video' ? 'mp4' : 'png')
-
   const tmpDir = await mkdtemp(path.join(tmpdir(), 'moonriver-'))
+
+  // Determine extension from the product URL's Content-Type or file extension
+  async function downloadTo(url: string, destPath: string): Promise<string> {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`Failed to download ${url}: ${res.status}`)
+    const contentType = res.headers.get('content-type')?.split(';')[0] ?? ''
+    await writeFile(destPath, Buffer.from(await res.arrayBuffer()))
+    return contentType
+  }
+
   const lipsyncPath = path.join(tmpDir, 'lipsync.mp4')
-  const productPath = path.join(tmpDir, `product.${ext}`)
   const outputPath = path.join(tmpDir, 'merged.mp4')
 
   try {
-    // Download lipsync video to temp file
-    const lipsyncRes = await fetch(lipsyncVideoUrl)
-    if (!lipsyncRes.ok) throw new Error(`Failed to download lipsync video: ${lipsyncRes.status}`)
-    const lipsyncBuffer = Buffer.from(await lipsyncRes.arrayBuffer())
-    await writeFile(lipsyncPath, lipsyncBuffer)
+    await downloadTo(lipsyncVideoUrl, lipsyncPath)
 
-    // Write product media from base64 to temp file
-    const base64Data = productMediaBase64.replace(/^data:[^;]+;base64,/, '')
-    const productBuffer = Buffer.from(base64Data, 'base64')
-    await writeFile(productPath, productBuffer)
+    // Download product media — derive extension from content-type
+    const tempProductPath = path.join(tmpDir, 'product_tmp')
+    const contentType = await downloadTo(productMediaUrl, tempProductPath)
+    const ext = MIME_TO_EXT[contentType] ?? (productMediaType === 'video' ? 'mp4' : 'png')
+    const productPath = `${tempProductPath}.${ext}`
+    const { rename } = await import('fs/promises')
+    await rename(tempProductPath, productPath)
 
-    // Run merge
     await mergeVideo({ voiceover: lipsyncPath, product: productPath, output: outputPath })
 
-    // Read merged output and upload to S3
-    const mergedBuffer = await readFile(outputPath)
     const filename = `merged_${Date.now()}.mp4`
-    const mergedVideoUrl = await uploadToS3(mergedBuffer, 'merged', filename, 'video/mp4')
+    const mergedVideoUrl = await uploadToS3(await readFile(outputPath), 'merged', filename, 'video/mp4')
 
     return NextResponse.json({ mergedVideoUrl })
   } finally {
-    await Promise.allSettled([
-      unlink(lipsyncPath).catch(() => {}),
-      unlink(productPath).catch(() => {}),
-      unlink(outputPath).catch(() => {}),
-    ])
+    const { readdir } = await import('fs/promises')
+    const files = await readdir(tmpDir).catch(() => [] as string[])
+    await Promise.allSettled(files.map((f) => unlink(path.join(tmpDir, f)).catch(() => {})))
   }
 }
