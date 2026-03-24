@@ -37,6 +37,12 @@ const INITIAL_STAGES: Stage[] = [
     description: 'Adding lip sync to avatar',
     status: 'pending',
   },
+  {
+    id: 'merge',
+    label: 'Merging video',
+    description: 'Combining product media with lipsync',
+    status: 'pending',
+  },
 ]
 
 export default function GeneratingPage() {
@@ -44,6 +50,7 @@ export default function GeneratingPage() {
   const [stages, setStages] = useState<Stage[]>(INITIAL_STAGES)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [mergedVideoUrl, setMergedVideoUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [avatarId, setAvatarId] = useState(0)
 
@@ -58,17 +65,24 @@ export default function GeneratingPage() {
       return
     }
 
-    const { script, selectedAvatar } = JSON.parse(raw) as {
+    const { script, selectedAvatar, productMediaBase64, productMediaType } = JSON.parse(raw) as {
       script: string
       selectedAvatar: number
+      productMediaBase64: string
+      productMediaType: 'image' | 'video'
     }
 
     setAvatarId(selectedAvatar)
-    run(script, selectedAvatar)
+    run(script, selectedAvatar, productMediaBase64, productMediaType)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function run(script: string, selectedAvatar: number) {
+  async function run(
+    script: string,
+    selectedAvatar: number,
+    productMediaBase64: string,
+    productMediaType: 'image' | 'video',
+  ) {
     // Stage: audio
     setStageStatus('audio', 'active')
     let audioDataUri: string | null = null
@@ -101,22 +115,55 @@ export default function GeneratingPage() {
 
     // Stage: lipsync
     setStageStatus('lipsync', 'active')
+    let lipsyncVideoUrl: string | null = null
     try {
-      const res = await fetch('/api/generate-lipsync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audioBase64: audioDataUri, avatarId: selectedAvatar }),
-      })
-      if (!res.ok) {
+      // DEV: skip VEED API call and use a local mock URL
+      const devLipsyncUrl = process.env.NEXT_PUBLIC_DEV_LIPSYNC_URL
+      if (devLipsyncUrl) {
+        lipsyncVideoUrl = devLipsyncUrl
+      } else {
+        const res = await fetch('/api/generate-lipsync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audioBase64: audioDataUri, avatarId: selectedAvatar }),
+        })
+        if (!res.ok) {
+          const data = await res.json()
+          throw new Error(data.error ?? 'Failed to generate lipsync')
+        }
         const data = await res.json()
-        throw new Error(data.error ?? 'Failed to generate lipsync')
+        lipsyncVideoUrl = data.videoUrl
       }
-      const data = await res.json()
-      setVideoUrl(data.videoUrl)
+      setVideoUrl(lipsyncVideoUrl)
       setStageStatus('lipsync', 'done')
     } catch (err) {
       setStageStatus('lipsync', 'error')
       setError(err instanceof Error ? err.message : 'Lipsync generation failed')
+      return
+    }
+
+    // Stage: merge
+    setStageStatus('merge', 'active')
+    try {
+      const res = await fetch('/api/merge-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lipsyncVideoUrl,
+          productMediaBase64,
+          productMediaType,
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error ?? 'Failed to merge video')
+      }
+      const data = await res.json()
+      setMergedVideoUrl(data.mergedVideoUrl)
+      setStageStatus('merge', 'done')
+    } catch (err) {
+      setStageStatus('merge', 'error')
+      setError(err instanceof Error ? err.message : 'Video merge failed')
     }
   }
 
@@ -159,7 +206,7 @@ export default function GeneratingPage() {
             </h2>
             <p className="text-sm text-zinc-500">
               {allDone
-                ? 'Your lipsync video and voiceover are ready below.'
+                ? 'Your merged UGC video is ready below.'
                 : hasError
                   ? 'One or more stages failed. Go back and try again.'
                   : 'Sit tight while we build each asset.'}
@@ -262,6 +309,31 @@ export default function GeneratingPage() {
                 </div>
               </div>
               <video controls src={videoUrl} className="w-full rounded-xl" />
+            </div>
+          )}
+
+          {/* Merged final video */}
+          {mergedVideoUrl && (
+            <div className="bg-white border border-emerald-200 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-zinc-900">Final Video</p>
+                  <p className="text-xs text-zinc-500">Product media + {avatar.name} · Ready to post</p>
+                </div>
+                <a
+                  href={mergedVideoUrl}
+                  download="moonriver_ugc.mp4"
+                  className="ml-auto text-xs font-medium text-violet-600 hover:text-violet-500 transition-colors"
+                >
+                  Download
+                </a>
+              </div>
+              <video controls src={mergedVideoUrl} className="w-full rounded-xl" />
             </div>
           )}
 

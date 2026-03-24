@@ -68,10 +68,22 @@ export default function Home() {
     }
   }
 
-  function handleCreateVideo() {
+  async function handleCreateVideo() {
+    if (!productMedia) return
+
+    // Convert blob URL to base64 so it can be passed via sessionStorage to /generating
+    const res = await fetch(productMedia.src)
+    const blob = await res.blob()
+    const productMediaBase64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+
     sessionStorage.setItem(
       'ugc_job',
-      JSON.stringify({ script, selectedAvatar }),
+      JSON.stringify({ script, selectedAvatar, productMediaBase64, productMediaType: productMedia.type }),
     )
     router.push('/generating')
   }
@@ -190,7 +202,13 @@ export default function Home() {
 
             <button
               onClick={handleCreateVideo}
-              className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+              disabled={!productMedia}
+              title={!productMedia ? 'Upload a product image or video first' : undefined}
+              className={`text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
+                productMedia
+                  ? 'bg-violet-600 hover:bg-violet-500 cursor-pointer'
+                  : 'bg-violet-300 cursor-not-allowed'
+              }`}
             >
               Create Video
             </button>

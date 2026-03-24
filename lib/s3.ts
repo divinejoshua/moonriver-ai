@@ -11,7 +11,7 @@ const s3 = new S3Client({
 
 const BUCKET = process.env.AWS_S3_BUCKET_NAME!
 
-export type S3Folder = 'images' | 'audio' | 'lipsync'
+export type S3Folder = 'images' | 'audio' | 'lipsync' | 'merged'
 
 /**
  * Uploads a buffer to S3 under the given folder and returns a pre-signed
