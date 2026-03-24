@@ -1,16 +1,11 @@
 import { NextResponse } from 'next/server'
-import { execFile } from 'child_process'
-import { promisify } from 'util'
 import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
-import { tmpdir, homedir } from 'os'
+import { tmpdir } from 'os'
 import path from 'path'
 import { uploadToS3 } from '@/lib/s3'
-
-const execFileAsync = promisify(execFile)
+import { mergeVideo } from '@/lib/merge-video'
 
 export const maxDuration = 120
-
-const MERGE_SCRIPT = path.join(homedir(), '.claude/skills/ugc-video-merger/scripts/merge.py')
 
 const MIME_TO_EXT: Record<string, string> = {
   'image/png': 'png',
@@ -56,8 +51,8 @@ export async function POST(req: Request) {
     const productBuffer = Buffer.from(base64Data, 'base64')
     await writeFile(productPath, productBuffer)
 
-    // Run merge script
-    await execFileAsync('python3', [MERGE_SCRIPT, lipsyncPath, productPath, '-o', outputPath])
+    // Run merge
+    await mergeVideo({ voiceover: lipsyncPath, product: productPath, output: outputPath })
 
     // Read merged output and upload to S3
     const mergedBuffer = await readFile(outputPath)
