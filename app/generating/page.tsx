@@ -87,17 +87,26 @@ export default function GeneratingPage() {
     setStageStatus('audio', 'active')
     let audioDataUri: string | null = null
     try {
-      const voiceId = AVATAR_VOICE_MAP[selectedAvatar]
-      const res = await fetch('/api/generate-audio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ script, voiceId }),
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error ?? 'Failed to generate audio')
+      const devAudioUrl = process.env.NEXT_PUBLIC_DEV_AUDIO_URL
+      let blob: Blob
+      if (devAudioUrl) {
+        // DEV: skip ElevenLabs API call and fetch the mock audio directly
+        const res = await fetch(devAudioUrl)
+        if (!res.ok) throw new Error('Failed to fetch dev audio')
+        blob = await res.blob()
+      } else {
+        const voiceId = AVATAR_VOICE_MAP[selectedAvatar]
+        const res = await fetch('/api/generate-audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ script, voiceId }),
+        })
+        if (!res.ok) {
+          const data = await res.json()
+          throw new Error(data.error ?? 'Failed to generate audio')
+        }
+        blob = await res.blob()
       }
-      const blob = await res.blob()
       setAudioUrl(URL.createObjectURL(blob))
 
       const arrayBuffer = await blob.arrayBuffer()
