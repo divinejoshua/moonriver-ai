@@ -167,6 +167,14 @@ export default function GeneratingPage() {
     }
 
     // Stage: merge
+    const devCaptionedUrl = process.env.NEXT_PUBLIC_DEV_CAPTIONED_URL
+    if (devCaptionedUrl) {
+      // DEV: skip merge + caption pipeline and use pre-generated captioned video
+      setStageStatus('merge', 'done')
+      setStageStatus('caption', 'done')
+      setMergedVideoUrl(devCaptionedUrl)
+      return
+    }
     setStageStatus('merge', 'active')
     let mergedUrl: string | null = null
     try {
