@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import VideoPreview from './components/VideoPreview'
 import ProductMedia, { type ProductMediaValue } from './components/ProductMedia'
+import bgmTracks from '@/public/bgm.json'
 
 const AVATARS = [
   { id: 0, name: 'Marcus', src: '/avatars/one.png' },
@@ -18,13 +19,6 @@ const AVATAR_VOICE_MAP: Record<number, string> = {
   2: 'dMyQqiVXTU80dDl2eNK8', // Jade — American Lady
 }
 
-const MUSIC_OPTIONS = [
-  { value: 'none', label: 'No music' },
-  { value: 'upbeat', label: 'Upbeat Pop' },
-  { value: 'lofi', label: 'Chill Lo-Fi' },
-  { value: 'corporate', label: 'Corporate' },
-  { value: 'edm', label: 'Energetic EDM' },
-]
 
 const SAMPLE_SCRIPT = `Hey guys! I've been using this product for the past few weeks and honestly? It's been a game changer.
 
@@ -43,10 +37,30 @@ export default function Home() {
   const [step, setStep] = useState<Step>('input')
   const [url, setUrl] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState(0)
-  const [selectedMusic, setSelectedMusic] = useState('upbeat')
+  const defaultTrack = bgmTracks.find((t) => t.name === 'me-and-the-devil')!
+  const [selectedMusic, setSelectedMusic] = useState<string>(defaultTrack.url)
+  const [musicExpanded, setMusicExpanded] = useState(false)
+  const [playingTrack, setPlayingTrack] = useState<string | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const [script, setScript] = useState(SAMPLE_SCRIPT)
   const [productMedia, setProductMedia] = useState<ProductMediaValue>(null)
   const [error, setError] = useState<string | null>(null)
+
+  function togglePlay(url: string) {
+    if (playingTrack === url) {
+      audioRef.current?.pause()
+      setPlayingTrack(null)
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause()
+      }
+      const audio = new Audio(url)
+      audio.addEventListener('ended', () => setPlayingTrack(null))
+      audio.play()
+      audioRef.current = audio
+      setPlayingTrack(url)
+    }
+  }
 
   async function handleGenerate() {
     if (!url.trim()) return
@@ -72,7 +86,7 @@ export default function Home() {
     if (!productMedia) return
     sessionStorage.setItem(
       'ugc_job',
-      JSON.stringify({ script, selectedAvatar, productMediaUrl: productMedia.s3Url, productMediaType: productMedia.type }),
+      JSON.stringify({ script, selectedAvatar, productMediaUrl: productMedia.s3Url, productMediaType: productMedia.type, musicUrl: selectedMusic === 'none' ? null : selectedMusic }),
     )
     router.push('/generating')
   }
@@ -228,28 +242,119 @@ export default function Home() {
               </section>
 
               {/* Background Music */}
-              <section className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Background Music</label>
-                <div className="relative">
-                  <select
-                    value={selectedMusic}
-                    onChange={(e) => setSelectedMusic(e.target.value)}
-                    className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2.5 pr-8 text-zinc-900 text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 appearance-none cursor-pointer shadow-sm"
+              <section className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-zinc-700">Background Music</label>
+                  <button
+                    onClick={() => setMusicExpanded((v) => !v)}
+                    className="text-xs text-violet-600 hover:text-violet-500 transition-colors"
                   >
-                    {MUSIC_OPTIONS.map((m) => (
-                      <option key={m.value} value={m.value}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                    {musicExpanded ? 'Done' : 'Change'}
+                  </button>
+                </div>
+
+                <div className="space-y-1.5">
+                  {musicExpanded ? (
+                    /* Expanded: show all tracks + no-music option */
+                    <>
+                      <button
+                        onClick={() => { setSelectedMusic('none'); setMusicExpanded(false) }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all ${
+                          selectedMusic === 'none'
+                            ? 'bg-violet-50 border-violet-300 ring-1 ring-violet-400'
+                            : 'bg-white border-zinc-200 hover:border-zinc-300'
+                        }`}
+                      >
+                        <div className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
+                          <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                          </svg>
+                        </div>
+                        <span className={`flex-1 text-left font-medium ${selectedMusic === 'none' ? 'text-violet-700' : 'text-zinc-700'}`}>
+                          No music
+                        </span>
+                      </button>
+
+                      {bgmTracks.map((track) => {
+                        const isSelected = selectedMusic === track.url
+                        const isPlaying = playingTrack === track.url
+                        const displayName = track.name.replace(/[+_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                        return (
+                          <div
+                            key={track.url}
+                            onClick={() => { setSelectedMusic(track.url); setMusicExpanded(false) }}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-violet-50 border-violet-300 ring-1 ring-violet-400'
+                                : 'bg-white border-zinc-200 hover:border-zinc-300'
+                            }`}
+                          >
+                            <button
+                              onClick={(e) => { e.stopPropagation(); togglePlay(track.url) }}
+                              className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-violet-100 flex items-center justify-center shrink-0 transition-colors"
+                            >
+                              {isPlaying ? (
+                                <svg className="w-3.5 h-3.5 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                                </svg>
+                              ) : (
+                                <svg className="w-3.5 h-3.5 text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              )}
+                            </button>
+                            <span className={`flex-1 text-left font-medium truncate ${isSelected ? 'text-violet-700' : 'text-zinc-700'}`}>
+                              {displayName}
+                            </span>
+                            {isPlaying && (
+                              <span className="text-xs text-violet-500 font-medium shrink-0">Playing</span>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </>
+                  ) : (
+                    /* Collapsed: show only the selected track */
+                    (() => {
+                      const track = bgmTracks.find((t) => t.url === selectedMusic)
+                      const isPlaying = playingTrack === selectedMusic
+                      const displayName = track
+                        ? track.name.replace(/[+_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                        : 'No music'
+                      return (
+                        <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-violet-50 border-violet-300 ring-1 ring-violet-400 text-sm">
+                          {track ? (
+                            <button
+                              onClick={() => togglePlay(track.url)}
+                              className="w-7 h-7 rounded-full bg-violet-100 hover:bg-violet-200 flex items-center justify-center shrink-0 transition-colors"
+                            >
+                              {isPlaying ? (
+                                <svg className="w-3.5 h-3.5 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                                </svg>
+                              ) : (
+                                <svg className="w-3.5 h-3.5 text-violet-500" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              )}
+                            </button>
+                          ) : (
+                            <div className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
+                              <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                              </svg>
+                            </div>
+                          )}
+                          <span className="flex-1 font-medium text-violet-700 truncate">{displayName}</span>
+                          {isPlaying && (
+                            <span className="text-xs text-violet-500 font-medium shrink-0">Playing</span>
+                          )}
+                        </div>
+                      )
+                    })()
+                  )}
                 </div>
               </section>
 
