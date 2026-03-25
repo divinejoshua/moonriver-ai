@@ -1,25 +1,24 @@
 import { execFile } from 'child_process'
 import { promisify } from 'util'
-import { writeFile, unlink } from 'fs/promises'
+import { writeFile, unlink, readFile } from 'fs/promises'
 import path from 'path'
 import { createCanvas } from '@napi-rs/canvas'
-
 const execFileAsync = promisify(execFile)
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const FFMPEG: string = require('ffmpeg-static')
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const FFPROBE: string = require('ffprobe-static').path
 
-async function getVideoInfo(filePath: string): Promise<{ width: number; height: number; duration: number }> {
-  const { stdout } = await execFileAsync('ffprobe', [
+async function getVideoInfo(filePath: string): Promise<{ width: number; height: number }> {
+  const { stdout } = await execFileAsync(FFPROBE, [
     '-v', 'error',
     '-select_streams', 'v:0',
     '-show_entries', 'stream=width,height',
-    '-show_entries', 'format=duration',
     '-of', 'csv=p=0',
     filePath,
   ])
-  const lines = stdout.trim().split('\n').map((l) => l.trim()).filter(Boolean)
-  // ffprobe csv output: first line is stream (width,height), second is format (duration)
-  const [width, height] = lines[0].split(',').map(Number)
-  const duration = parseFloat(lines[1])
-  return { width, height, duration }
+  const [width, height] = stdout.trim().split(',').map(Number)
+  return { width, height }
 }
 
 interface Chunk {
@@ -28,30 +27,36 @@ interface Chunk {
   end: number
 }
 
-function buildChunks(script: string, duration: number, maxWords: number): Chunk[] {
-  const words = script.trim().split(/\s+/).filter(Boolean)
-  const groups: string[] = []
-  for (let i = 0; i < words.length; i += maxWords) {
-    groups.push(words.slice(i, i + maxWords).join(' '))
-  }
-  if (groups.length === 0) return []
-  const chunkDur = duration / groups.length
-  return groups.map((text, i) => ({
-    text,
-    start: i * chunkDur,
-    end: (i + 1) * chunkDur,
-  }))
-}
+async function transcribeToChunks(videoPath: string, maxWords: number): Promise<Chunk[]> {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) throw new Error('OPENAI_API_KEY is not configured')
 
-function buildChunksFromTimings(
-  timings: { word: string; start: number; end: number }[],
-  maxWords: number,
-): Chunk[] {
+  const videoBuffer = await readFile(videoPath)
+  const formData = new FormData()
+  formData.append('file', new Blob([videoBuffer], { type: 'video/mp4' }), 'input.mp4')
+  formData.append('model', 'whisper-1')
+  formData.append('response_format', 'verbose_json')
+  formData.append('timestamp_granularities[]', 'word')
+
+  const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: formData,
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Whisper transcription failed: ${text}`)
+  }
+
+  const data = await res.json() as { words: { word: string; start: number; end: number }[] }
+  const words = (data.words ?? []).map((w) => ({ ...w, word: w.word.trim() })).filter((w) => w.word)
+
   const chunks: Chunk[] = []
-  for (let i = 0; i < timings.length; i += maxWords) {
-    const group = timings.slice(i, i + maxWords)
+  for (let i = 0; i < words.length; i += maxWords) {
+    const group = words.slice(i, i + maxWords)
     chunks.push({
-      text: group.map((t) => t.word).join(' '),
+      text: group.map((w) => w.word).join(' '),
       start: group[0].start,
       end: group[group.length - 1].end,
     })
@@ -59,7 +64,6 @@ function buildChunksFromTimings(
   return chunks
 }
 
-/** Render a caption as a transparent RGBA PNG — white bold text with black outline. */
 async function renderCaptionPng(
   text: string,
   videoWidth: number,
@@ -71,7 +75,6 @@ async function renderCaptionPng(
   const ctx = canvas.getContext('2d')
 
   ctx.clearRect(0, 0, videoWidth, videoHeight)
-
   ctx.font = `bold ${fontSize}px sans-serif`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'bottom'
@@ -79,13 +82,11 @@ async function renderCaptionPng(
   const x = videoWidth / 2
   const y = videoHeight - marginV
 
-  // Black outline
   ctx.strokeStyle = 'black'
   ctx.lineWidth = fontSize * 0.08
   ctx.lineJoin = 'round'
   ctx.strokeText(text, x, y)
 
-  // White fill
   ctx.fillStyle = 'white'
   ctx.fillText(text, x, y)
 
@@ -95,30 +96,23 @@ async function renderCaptionPng(
 export interface CaptionOptions {
   input: string
   output: string
-  script: string
-  /** Directory to write temp PNG files — should be the same tmpDir as the caller */
   tmpDir: string
   fontSize?: number
   marginV?: number
   maxWords?: number
-  /** Word-level timestamps from ElevenLabs — when provided, captions sync to actual speech */
-  wordTimings?: { word: string; start: number; end: number }[]
 }
 
 export async function captionVideo(opts: CaptionOptions): Promise<void> {
-  const { input, output, script, tmpDir, fontSize = 45, marginV = 80, maxWords = 4, wordTimings } = opts
+  const { input, output, tmpDir, fontSize = 45, marginV = 80, maxWords = 4 } = opts
 
-  const { width, height, duration } = await getVideoInfo(input)
-  const chunks = wordTimings && wordTimings.length > 0
-    ? buildChunksFromTimings(wordTimings, maxWords)
-    : buildChunks(script, duration, maxWords)
+  const { width, height } = await getVideoInfo(input)
+  const chunks = await transcribeToChunks(input, maxWords)
 
   if (chunks.length === 0) {
-    await execFileAsync('ffmpeg', ['-y', '-i', input, '-c', 'copy', output])
+    await execFileAsync(FFMPEG, ['-y', '-i', input, '-c', 'copy', output])
     return
   }
 
-  // Render each caption chunk as a transparent PNG
   const pngPaths: string[] = []
   try {
     for (let i = 0; i < chunks.length; i++) {
@@ -128,12 +122,9 @@ export async function captionVideo(opts: CaptionOptions): Promise<void> {
       pngPaths.push(pngPath)
     }
 
-    // Build FFmpeg args: main video + one -i per caption PNG
     const ffArgs: string[] = ['-y', '-i', input]
     pngPaths.forEach((p) => ffArgs.push('-i', p))
 
-    // Build filter_complex: chain overlay filters, one per caption
-    // [0:v][1:v]overlay=...:enable='between(t,s,e)'[v1];[v1][2:v]overlay=...
     const filterParts: string[] = []
     let prev = '0:v'
     chunks.forEach((chunk, i) => {
@@ -157,7 +148,7 @@ export async function captionVideo(opts: CaptionOptions): Promise<void> {
       output,
     )
 
-    await execFileAsync('ffmpeg', ffArgs)
+    await execFileAsync(FFMPEG, ffArgs)
   } finally {
     await Promise.allSettled(pngPaths.map((p) => unlink(p).catch(() => {})))
   }

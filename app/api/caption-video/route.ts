@@ -5,17 +5,13 @@ import path from 'path'
 import { uploadToS3 } from '@/lib/s3'
 import { captionVideo } from '@/lib/caption-video'
 
-export const maxDuration = 120
+export const maxDuration = 300
 
 export async function POST(req: Request) {
-  const { videoUrl, script, wordTimings } = await req.json() as {
-    videoUrl: string
-    script: string
-    wordTimings?: { word: string; start: number; end: number }[]
-  }
+  const { videoUrl } = await req.json() as { videoUrl: string }
 
-  if (!videoUrl || !script) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  if (!videoUrl) {
+    return NextResponse.json({ error: 'Missing videoUrl' }, { status: 400 })
   }
 
   const tmpDir = await mkdtemp(path.join(tmpdir(), 'moonriver-'))
@@ -27,7 +23,7 @@ export async function POST(req: Request) {
     if (!res.ok) throw new Error(`Failed to download video: ${res.status}`)
     await writeFile(inputPath, Buffer.from(await res.arrayBuffer()))
 
-    await captionVideo({ input: inputPath, output: outputPath, script, tmpDir, wordTimings })
+    await captionVideo({ input: inputPath, output: outputPath, tmpDir })
 
     const filename = `captioned_${Date.now()}.mp4`
     const captionedVideoUrl = await uploadToS3(await readFile(outputPath), 'merged', filename, 'video/mp4')

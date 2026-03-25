@@ -59,7 +59,6 @@ export default function GeneratingPage() {
   const [mergedVideoUrl, setMergedVideoUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [avatarId, setAvatarId] = useState(0)
-  const [wordTimings, setWordTimings] = useState<{ word: string; start: number; end: number }[] | null>(null)
   const hasStarted = useRef(false)
 
   function setStageStatus(id: string, status: StageStatus) {
@@ -122,10 +121,13 @@ export default function GeneratingPage() {
           const data = await res.json()
           throw new Error(data.error ?? 'Failed to generate audio')
         }
-        const data = await res.json() as { audioBase64: string; wordTimings: { word: string; start: number; end: number }[] }
-        audioDataUri = `data:audio/mpeg;base64,${data.audioBase64}`
-        setAudioUrl(audioDataUri)
-        setWordTimings(data.wordTimings)
+        const blob = await res.blob()
+        setAudioUrl(URL.createObjectURL(blob))
+        const arrayBuffer = await blob.arrayBuffer()
+        const uint8 = new Uint8Array(arrayBuffer)
+        let binary = ''
+        uint8.forEach((b) => { binary += String.fromCharCode(b) })
+        audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
       }
 
       setStageStatus('audio', 'done')
@@ -192,7 +194,7 @@ export default function GeneratingPage() {
       const res = await fetch('/api/caption-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: mergedUrl, script, wordTimings }),
+        body: JSON.stringify({ videoUrl: mergedUrl }),
       })
       if (!res.ok) {
         const data = await res.json()

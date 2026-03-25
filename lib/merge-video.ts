@@ -1,13 +1,16 @@
 import { execFile } from 'child_process'
 import { promisify } from 'util'
 import path from 'path'
-
 const execFileAsync = promisify(execFile)
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const FFMPEG: string = require('ffmpeg-static')
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const FFPROBE: string = require('ffprobe-static').path
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp', '.tiff', '.tif'])
 
 async function getDuration(filePath: string): Promise<number> {
-  const { stdout } = await execFileAsync('ffprobe', [
+  const { stdout } = await execFileAsync(FFPROBE, [
     '-v', 'error',
     '-show_entries', 'format=duration',
     '-of', 'csv=p=0',
@@ -131,5 +134,5 @@ export async function mergeVideo(opts: MergeOptions): Promise<void> {
     ]
   }
 
-  await execFileAsync('ffmpeg', args)
+  await execFileAsync(FFMPEG, args)
 }
