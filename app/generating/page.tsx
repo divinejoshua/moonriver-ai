@@ -182,6 +182,12 @@ export default function GeneratingPage() {
       setStageStatus('caption', 'done')
       // bgm still runs after this — fall through with captionedUrl
       const captionedUrlDev = devCaptionedUrl
+      const devBgmUrlEarly = process.env.NEXT_PUBLIC_DEV_BGM_URL
+      if (devBgmUrlEarly) {
+        setStageStatus('bgm', 'done')
+        setMergedVideoUrl(devBgmUrlEarly)
+        return
+      }
       if (!musicUrl) {
         setStageStatus('bgm', 'done')
         setMergedVideoUrl(captionedUrlDev)
@@ -251,6 +257,13 @@ export default function GeneratingPage() {
     }
 
     // Stage: bgm
+    const devBgmUrl = process.env.NEXT_PUBLIC_DEV_BGM_URL
+    if (devBgmUrl) {
+      // DEV: skip bgm pipeline and use pre-generated final video
+      setStageStatus('bgm', 'done')
+      setMergedVideoUrl(devBgmUrl)
+      return
+    }
     if (!musicUrl) {
       setStageStatus('bgm', 'done')
       setMergedVideoUrl(captionedUrl)
