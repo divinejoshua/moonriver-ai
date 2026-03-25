@@ -43,6 +43,22 @@ function buildChunks(script: string, duration: number, maxWords: number): Chunk[
   }))
 }
 
+function buildChunksFromTimings(
+  timings: { word: string; start: number; end: number }[],
+  maxWords: number,
+): Chunk[] {
+  const chunks: Chunk[] = []
+  for (let i = 0; i < timings.length; i += maxWords) {
+    const group = timings.slice(i, i + maxWords)
+    chunks.push({
+      text: group.map((t) => t.word).join(' '),
+      start: group[0].start,
+      end: group[group.length - 1].end,
+    })
+  }
+  return chunks
+}
+
 /** Render a caption as a transparent RGBA PNG — white bold text with black outline. */
 async function renderCaptionPng(
   text: string,
@@ -85,13 +101,17 @@ export interface CaptionOptions {
   fontSize?: number
   marginV?: number
   maxWords?: number
+  /** Word-level timestamps from ElevenLabs — when provided, captions sync to actual speech */
+  wordTimings?: { word: string; start: number; end: number }[]
 }
 
 export async function captionVideo(opts: CaptionOptions): Promise<void> {
-  const { input, output, script, tmpDir, fontSize = 45, marginV = 80, maxWords = 4 } = opts
+  const { input, output, script, tmpDir, fontSize = 45, marginV = 80, maxWords = 4, wordTimings } = opts
 
   const { width, height, duration } = await getVideoInfo(input)
-  const chunks = buildChunks(script, duration, maxWords)
+  const chunks = wordTimings && wordTimings.length > 0
+    ? buildChunksFromTimings(wordTimings, maxWords)
+    : buildChunks(script, duration, maxWords)
 
   if (chunks.length === 0) {
     await execFileAsync('ffmpeg', ['-y', '-i', input, '-c', 'copy', output])

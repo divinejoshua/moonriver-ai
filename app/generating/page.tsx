@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const AVATARS = [
@@ -59,17 +59,23 @@ export default function GeneratingPage() {
   const [mergedVideoUrl, setMergedVideoUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [avatarId, setAvatarId] = useState(0)
+  const [wordTimings, setWordTimings] = useState<{ word: string; start: number; end: number }[] | null>(null)
+  const hasStarted = useRef(false)
 
   function setStageStatus(id: string, status: StageStatus) {
     setStages((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)))
   }
 
   useEffect(() => {
+    if (hasStarted.current) return
+    hasStarted.current = true
+
     const raw = sessionStorage.getItem('ugc_job')
     if (!raw) {
       router.replace('/')
       return
     }
+    sessionStorage.removeItem('ugc_job')
 
     const { script, selectedAvatar, productMediaUrl, productMediaType } = JSON.parse(raw) as {
       script: string
@@ -94,12 +100,17 @@ export default function GeneratingPage() {
     let audioDataUri: string | null = null
     try {
       const devAudioUrl = process.env.NEXT_PUBLIC_DEV_AUDIO_URL
-      let blob: Blob
       if (devAudioUrl) {
         // DEV: skip ElevenLabs API call and fetch the mock audio directly
         const res = await fetch(devAudioUrl)
         if (!res.ok) throw new Error('Failed to fetch dev audio')
-        blob = await res.blob()
+        const blob = await res.blob()
+        setAudioUrl(URL.createObjectURL(blob))
+        const arrayBuffer = await blob.arrayBuffer()
+        const uint8 = new Uint8Array(arrayBuffer)
+        let binary = ''
+        uint8.forEach((b) => { binary += String.fromCharCode(b) })
+        audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
       } else {
         const voiceId = AVATAR_VOICE_MAP[selectedAvatar]
         const res = await fetch('/api/generate-audio', {
@@ -111,15 +122,11 @@ export default function GeneratingPage() {
           const data = await res.json()
           throw new Error(data.error ?? 'Failed to generate audio')
         }
-        blob = await res.blob()
+        const data = await res.json() as { audioBase64: string; wordTimings: { word: string; start: number; end: number }[] }
+        audioDataUri = `data:audio/mpeg;base64,${data.audioBase64}`
+        setAudioUrl(audioDataUri)
+        setWordTimings(data.wordTimings)
       }
-      setAudioUrl(URL.createObjectURL(blob))
-
-      const arrayBuffer = await blob.arrayBuffer()
-      const uint8 = new Uint8Array(arrayBuffer)
-      let binary = ''
-      uint8.forEach((b) => { binary += String.fromCharCode(b) })
-      audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
 
       setStageStatus('audio', 'done')
     } catch (err) {
@@ -185,7 +192,7 @@ export default function GeneratingPage() {
       const res = await fetch('/api/caption-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: mergedUrl, script }),
+        body: JSON.stringify({ videoUrl: mergedUrl, script, wordTimings }),
       })
       if (!res.ok) {
         const data = await res.json()

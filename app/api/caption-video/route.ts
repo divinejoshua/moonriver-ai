@@ -8,9 +8,10 @@ import { captionVideo } from '@/lib/caption-video'
 export const maxDuration = 120
 
 export async function POST(req: Request) {
-  const { videoUrl, script } = await req.json() as {
+  const { videoUrl, script, wordTimings } = await req.json() as {
     videoUrl: string
     script: string
+    wordTimings?: { word: string; start: number; end: number }[]
   }
 
   if (!videoUrl || !script) {
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
     if (!res.ok) throw new Error(`Failed to download video: ${res.status}`)
     await writeFile(inputPath, Buffer.from(await res.arrayBuffer()))
 
-    await captionVideo({ input: inputPath, output: outputPath, script, tmpDir })
+    await captionVideo({ input: inputPath, output: outputPath, script, tmpDir, wordTimings })
 
     const filename = `captioned_${Date.now()}.mp4`
     const captionedVideoUrl = await uploadToS3(await readFile(outputPath), 'merged', filename, 'video/mp4')
