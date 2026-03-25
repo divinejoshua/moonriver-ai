@@ -111,6 +111,7 @@ ${HOOK_BANK}
 - The hook must feel native to social media, not like an ad or press release
 - Fill in all [placeholders] with real product-specific details from the page
 - If a social proof stat isn't on the page, use a personal result framing instead
+- Vary your hook selection — do NOT default to hook #2 or any single hook every time; choose the hook that genuinely fits the product's strongest angle
 - Output ONLY the script text — no labels, headers, section names, or formatting marks`
 
 async function fetchPageText(url: string): Promise<string> {
