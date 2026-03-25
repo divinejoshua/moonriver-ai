@@ -49,6 +49,12 @@ const INITIAL_STAGES: Stage[] = [
     description: 'Burning voiceover script as captions',
     status: 'pending',
   },
+  {
+    id: 'bgm',
+    label: 'Adding background music',
+    description: 'Mixing in background track at low volume',
+    status: 'pending',
+  },
 ]
 
 export default function GeneratingPage() {
@@ -76,15 +82,16 @@ export default function GeneratingPage() {
     }
     sessionStorage.removeItem('ugc_job')
 
-    const { script, selectedAvatar, productMediaUrl, productMediaType } = JSON.parse(raw) as {
+    const { script, selectedAvatar, productMediaUrl, productMediaType, musicUrl } = JSON.parse(raw) as {
       script: string
       selectedAvatar: number
       productMediaUrl: string
       productMediaType: 'image' | 'video'
+      musicUrl: string | null
     }
 
     setAvatarId(selectedAvatar)
-    run(script, selectedAvatar, productMediaUrl, productMediaType)
+    run(script, selectedAvatar, productMediaUrl, productMediaType, musicUrl)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -93,6 +100,7 @@ export default function GeneratingPage() {
     selectedAvatar: number,
     productMediaUrl: string,
     productMediaType: 'image' | 'video',
+    musicUrl: string | null,
   ) {
     // Stage: audio
     setStageStatus('audio', 'active')
@@ -172,7 +180,31 @@ export default function GeneratingPage() {
       // DEV: skip merge + caption pipeline and use pre-generated captioned video
       setStageStatus('merge', 'done')
       setStageStatus('caption', 'done')
-      setMergedVideoUrl(devCaptionedUrl)
+      // bgm still runs after this — fall through with captionedUrl
+      const captionedUrlDev = devCaptionedUrl
+      if (!musicUrl) {
+        setStageStatus('bgm', 'done')
+        setMergedVideoUrl(captionedUrlDev)
+        return
+      }
+      setStageStatus('bgm', 'active')
+      try {
+        const res = await fetch('/api/add-bgm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: captionedUrlDev, musicUrl }),
+        })
+        if (!res.ok) {
+          const data = await res.json()
+          throw new Error(data.error ?? 'Failed to add background music')
+        }
+        const data = await res.json()
+        setMergedVideoUrl(data.finalVideoUrl)
+        setStageStatus('bgm', 'done')
+      } catch (err) {
+        setStageStatus('bgm', 'error')
+        setError(err instanceof Error ? err.message : 'Background music failed')
+      }
       return
     }
     setStageStatus('merge', 'active')
@@ -198,6 +230,7 @@ export default function GeneratingPage() {
 
     // Stage: caption
     setStageStatus('caption', 'active')
+    let captionedUrl: string | null = null
     try {
       const res = await fetch('/api/caption-video', {
         method: 'POST',
@@ -209,11 +242,37 @@ export default function GeneratingPage() {
         throw new Error(data.error ?? 'Failed to add captions')
       }
       const data = await res.json()
-      setMergedVideoUrl(data.captionedVideoUrl)
+      captionedUrl = data.captionedVideoUrl
       setStageStatus('caption', 'done')
     } catch (err) {
       setStageStatus('caption', 'error')
       setError(err instanceof Error ? err.message : 'Caption generation failed')
+      return
+    }
+
+    // Stage: bgm
+    if (!musicUrl) {
+      setStageStatus('bgm', 'done')
+      setMergedVideoUrl(captionedUrl)
+      return
+    }
+    setStageStatus('bgm', 'active')
+    try {
+      const res = await fetch('/api/add-bgm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl: captionedUrl, musicUrl }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error ?? 'Failed to add background music')
+      }
+      const data = await res.json()
+      setMergedVideoUrl(data.finalVideoUrl)
+      setStageStatus('bgm', 'done')
+    } catch (err) {
+      setStageStatus('bgm', 'error')
+      setError(err instanceof Error ? err.message : 'Background music failed')
     }
   }
 
