@@ -125,7 +125,7 @@ export default function Home() {
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-20">
           <div className="w-full max-w-xl space-y-8 text-center">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 bg-secondary border border-primary/30 text-primary text-xs font-medium px-3 py-1 rounded-full">
+              <div className="inline-flex items-center gap-2 bg-accent border border-primary/30 text-accent-foreground text-xs font-medium px-3 py-1 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                 AI-powered UGC video generator
               </div>
@@ -261,7 +261,7 @@ export default function Home() {
                         onClick={() => { setSelectedMusic('none'); setMusicExpanded(false) }}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all ${
                           selectedMusic === 'none'
-                            ? 'bg-secondary border-primary/50 ring-1 ring-ring'
+                            ? 'bg-accent border-primary/50 ring-1 ring-ring'
                             : 'bg-card border-border hover:border-ring/50'
                         }`}
                       >
@@ -271,7 +271,7 @@ export default function Home() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
                           </svg>
                         </div>
-                        <span className={`flex-1 text-left font-medium ${selectedMusic === 'none' ? 'text-primary' : 'text-foreground'}`}>
+                        <span className={`flex-1 text-left font-medium ${selectedMusic === 'none' ? 'text-accent-foreground' : 'text-foreground'}`}>
                           No music
                         </span>
                       </button>
@@ -286,7 +286,7 @@ export default function Home() {
                             onClick={() => { setSelectedMusic(track.url); setMusicExpanded(false) }}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all cursor-pointer ${
                               isSelected
-                                ? 'bg-secondary border-primary/50 ring-1 ring-ring'
+                                ? 'bg-accent border-primary/50 ring-1 ring-ring'
                                 : 'bg-card border-border hover:border-ring/50'
                             }`}
                           >
@@ -304,7 +304,7 @@ export default function Home() {
                                 </svg>
                               )}
                             </button>
-                            <span className={`flex-1 text-left font-medium truncate ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                            <span className={`flex-1 text-left font-medium truncate ${isSelected ? 'text-accent-foreground' : 'text-foreground'}`}>
                               {displayName}
                             </span>
                             {isPlaying && (
@@ -323,11 +323,11 @@ export default function Home() {
                         ? track.name.replace(/[+_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
                         : 'No music'
                       return (
-                        <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-secondary border-primary/50 ring-1 ring-ring text-sm">
+                        <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-accent border-primary/50 ring-1 ring-ring text-sm">
                           {track ? (
                             <button
                               onClick={() => togglePlay(track.url)}
-                              className="w-7 h-7 rounded-full bg-secondary hover:bg-secondary/80 flex items-center justify-center shrink-0 transition-colors"
+                              className="w-7 h-7 rounded-full bg-accent hover:bg-accent/80 flex items-center justify-center shrink-0 transition-colors"
                             >
                               {isPlaying ? (
                                 <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24">
@@ -347,7 +347,7 @@ export default function Home() {
                               </svg>
                             </div>
                           )}
-                          <span className="flex-1 font-medium text-primary truncate">{displayName}</span>
+                          <span className="flex-1 font-medium text-accent-foreground truncate">{displayName}</span>
                           {isPlaying && (
                             <span className="text-xs text-primary font-medium shrink-0">Playing</span>
                           )}
@@ -367,7 +367,7 @@ export default function Home() {
                       key={avatar.id}
                       onClick={() => setSelectedAvatar(avatar.id)}
                       className={`flex flex-col items-center gap-2 py-3 px-4 rounded-xl transition-all ${selectedAvatar === avatar.id
-                        ? 'bg-secondary ring-2 ring-primary'
+                        ? 'bg-accent ring-2 ring-primary'
                         : 'hover:bg-muted'
                         }`}
                     >

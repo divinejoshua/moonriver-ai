@@ -379,7 +379,7 @@ export default function GeneratingPage() {
                 {/* Stage badge */}
                 <div className="shrink-0">
                   {stage.status === 'active' && (
-                    <span className="text-xs font-medium text-primary bg-secondary px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-medium text-accent-foreground bg-accent px-2 py-0.5 rounded-full">
                       In progress
                     </span>
                   )}
@@ -402,7 +402,7 @@ export default function GeneratingPage() {
           {audioUrl && (
             <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center shrink-0">
                   <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-2c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
                   </svg>
@@ -420,7 +420,7 @@ export default function GeneratingPage() {
           {videoUrl && (
             <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center shrink-0">
                   <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M15 10l4.553-2.277A1 1 0 0121 8.764v6.472a1 1 0 01-1.447.894L15 14v-4zM3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
                   </svg>
