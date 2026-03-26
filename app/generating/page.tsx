@@ -294,11 +294,11 @@ export default function GeneratingPage() {
   const avatar = AVATARS[avatarId]
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
-      <header className="border-b border-zinc-200 bg-white px-6 py-4 flex items-center gap-3 shrink-0 sticky top-0 z-10">
-        <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center">
-          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3 shrink-0 sticky top-0 z-10">
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+          <svg className="w-4 h-4 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
             <path d="M15 10l4.553-2.277A1 1 0 0121 8.764v6.472a1 1 0 01-1.447.894L15 14v-4zM3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
           </svg>
         </div>
@@ -307,7 +307,7 @@ export default function GeneratingPage() {
         <div className="ml-auto">
           <button
             onClick={() => router.back()}
-            className="text-zinc-500 hover:text-zinc-900 text-sm flex items-center gap-1.5 transition-colors"
+            className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1.5 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -323,10 +323,10 @@ export default function GeneratingPage() {
 
           {/* Title */}
           <div className="space-y-1">
-            <h2 className="text-xl font-semibold text-zinc-900">
+            <h2 className="text-xl font-semibold text-foreground">
               {allDone ? 'Your video is ready' : hasError ? 'Something went wrong' : 'Creating your video…'}
             </h2>
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-muted-foreground">
               {allDone
                 ? 'Your merged UGC video is ready below.'
                 : hasError
@@ -336,7 +336,7 @@ export default function GeneratingPage() {
           </div>
 
           {/* Stage list */}
-          <div className="bg-white border border-zinc-200 rounded-2xl divide-y divide-zinc-100 shadow-sm overflow-hidden">
+          <div className="bg-card border border-border rounded-2xl divide-y divide-border shadow-sm overflow-hidden">
             {stages.map((stage) => (
               <div key={stage.id} className="flex items-center gap-4 px-5 py-4">
                 {/* Status icon */}
@@ -349,14 +349,14 @@ export default function GeneratingPage() {
                     </div>
                   )}
                   {stage.status === 'active' && (
-                    <div className="w-7 h-7 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+                    <div className="w-7 h-7 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                   )}
                   {stage.status === 'pending' && (
-                    <div className="w-7 h-7 rounded-full border-2 border-zinc-200" />
+                    <div className="w-7 h-7 rounded-full border-2 border-border" />
                   )}
                   {stage.status === 'error' && (
-                    <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-7 h-7 rounded-full bg-destructive/10 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </div>
@@ -365,12 +365,12 @@ export default function GeneratingPage() {
 
                 {/* Stage info */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${stage.status === 'pending' ? 'text-zinc-400' :
-                    stage.status === 'error' ? 'text-red-600' : 'text-zinc-900'
+                  <p className={`text-sm font-medium ${stage.status === 'pending' ? 'text-muted-foreground' :
+                    stage.status === 'error' ? 'text-destructive' : 'text-foreground'
                     }`}>
                     {stage.label}
                   </p>
-                  <p className={`text-xs mt-0.5 ${stage.status === 'pending' ? 'text-zinc-300' : 'text-zinc-500'
+                  <p className={`text-xs mt-0.5 ${stage.status === 'pending' ? 'text-muted-foreground/50' : 'text-muted-foreground'
                     }`}>
                     {stage.description}
                   </p>
@@ -379,7 +379,7 @@ export default function GeneratingPage() {
                 {/* Stage badge */}
                 <div className="shrink-0">
                   {stage.status === 'active' && (
-                    <span className="text-xs font-medium text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-medium text-primary bg-secondary px-2 py-0.5 rounded-full">
                       In progress
                     </span>
                   )}
@@ -389,7 +389,7 @@ export default function GeneratingPage() {
                     </span>
                   )}
                   {stage.status === 'error' && (
-                    <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-medium text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
                       Failed
                     </span>
                   )}
@@ -400,16 +400,16 @@ export default function GeneratingPage() {
 
           {/* Audio player */}
           {audioUrl && (
-            <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-3">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
-                  <svg className="w-4 h-4 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-2c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-zinc-900">Voiceover</p>
-                  <p className="text-xs text-zinc-500">{avatar.name} · American</p>
+                  <p className="text-sm font-medium text-foreground">Voiceover</p>
+                  <p className="text-xs text-muted-foreground">{avatar.name} · American</p>
                 </div>
               </div>
               <audio controls src={audioUrl} className="w-full" />
@@ -418,16 +418,16 @@ export default function GeneratingPage() {
 
           {/* Lipsync video player */}
           {videoUrl && (
-            <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-3">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
-                  <svg className="w-4 h-4 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M15 10l4.553-2.277A1 1 0 0121 8.764v6.472a1 1 0 01-1.447.894L15 14v-4zM3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-zinc-900">Lipsync Preview</p>
-                  <p className="text-xs text-zinc-500">{avatar.name} · Creator voice over</p>
+                  <p className="text-sm font-medium text-foreground">Lipsync Preview</p>
+                  <p className="text-xs text-muted-foreground">{avatar.name} · Creator voice over</p>
                 </div>
               </div>
               <video controls src={videoUrl} className="w-full rounded-xl" />
@@ -436,7 +436,7 @@ export default function GeneratingPage() {
 
           {/* Merged final video */}
           {mergedVideoUrl && (
-            <div className="bg-white border border-emerald-200 rounded-2xl p-5 shadow-sm space-y-3">
+            <div className="bg-card border border-emerald-200 rounded-2xl p-5 shadow-sm space-y-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                   <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -444,13 +444,13 @@ export default function GeneratingPage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-zinc-900">Final Video</p>
-                  <p className="text-xs text-zinc-500">Product media + {avatar.name} · Ready to post</p>
+                  <p className="text-sm font-medium text-foreground">Final Video</p>
+                  <p className="text-xs text-muted-foreground">Product media + {avatar.name} · Ready to post</p>
                 </div>
                 <a
                   href={mergedVideoUrl}
                   download="moonriver_ugc.mp4"
-                  className="ml-auto text-xs font-medium text-violet-600 hover:text-violet-500 transition-colors"
+                  className="ml-auto text-xs font-medium text-primary hover:text-primary/80 transition-colors"
                 >
                   Download
                 </a>
@@ -461,7 +461,7 @@ export default function GeneratingPage() {
 
           {/* Error */}
           {error && (
-            <p className="text-xs text-red-500 text-center">{error}</p>
+            <p className="text-xs text-destructive text-center">{error}</p>
           )}
 
           {/* Bottom padding so content clears the viewport */}

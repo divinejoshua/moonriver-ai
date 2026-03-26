@@ -109,15 +109,15 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen bg-zinc-50 text-zinc-900 flex flex-col overflow-hidden">
+    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       {/* ── Header ── */}
-      <header className="border-b border-zinc-200 bg-white px-6 py-4 flex items-center gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center">
-          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+          <svg className="w-4 h-4 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
             <path d="M15 10l4.553-2.277A1 1 0 0121 8.764v6.472a1 1 0 01-1.447.894L15 14v-4zM3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
           </svg>
         </div>
-        <span className="font-semibold text-base tracking-tight text-zinc-900">Moonriver</span>
+        <span className="font-semibold text-base tracking-tight text-foreground">Moonriver</span>
       </header>
 
       {/* ── Step 1: URL input ── */}
@@ -125,16 +125,16 @@ export default function Home() {
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-20">
           <div className="w-full max-w-xl space-y-8 text-center">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 bg-violet-50 border border-violet-200 text-violet-600 text-xs font-medium px-3 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+              <div className="inline-flex items-center gap-2 bg-secondary border border-primary/30 text-primary text-xs font-medium px-3 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                 AI-powered UGC video generator
               </div>
-              <h1 className="text-4xl font-bold tracking-tight text-zinc-900">
+              <h1 className="text-4xl font-bold tracking-tight text-foreground">
                 Paste a link.
                 <br />
                 Get a UGC video.
               </h1>
-              <p className="text-zinc-500 text-base leading-relaxed max-w-sm mx-auto">
+              <p className="text-muted-foreground text-base leading-relaxed max-w-sm mx-auto">
                 Drop in your product URL and we'll generate a review script, avatar voiceover, and
                 a ready-to-export video — in seconds.
               </p>
@@ -147,20 +147,20 @@ export default function Home() {
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
                 placeholder="https://yourproduct.com"
-                className="flex-1 bg-white border border-zinc-300 rounded-xl px-4 py-3.5 text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 text-sm shadow-sm"
+                className="flex-1 bg-card border border-border rounded-xl px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring text-sm shadow-sm"
               />
               <button
                 onClick={handleGenerate}
-                className="bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-white font-semibold px-5 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap"
+                className="bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground font-semibold px-5 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap"
               >
                 Generate
               </button>
             </div>
 
             {error && (
-              <p className="text-xs text-red-500 text-center">{error}</p>
+              <p className="text-xs text-destructive text-center">{error}</p>
             )}
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-muted-foreground">
               Works with Shopify, Amazon, landing pages, and more
             </p>
           </div>
@@ -171,12 +171,12 @@ export default function Home() {
       {step === 'generating' && (
         <div className="flex-1 flex flex-col items-center justify-center gap-5">
           <div className="relative w-14 h-14">
-            <div className="absolute inset-0 rounded-full border-4 border-zinc-200" />
-            <div className="absolute inset-0 rounded-full border-4 border-violet-500 border-t-transparent animate-spin" />
+            <div className="absolute inset-0 rounded-full border-4 border-border" />
+            <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
           </div>
           <div className="space-y-1 text-center">
-            <p className="text-zinc-900 font-medium">Generating your video…</p>
-            <p className="text-zinc-500 text-sm">Scraping product page and writing your script</p>
+            <p className="text-foreground font-medium">Generating your video…</p>
+            <p className="text-muted-foreground text-sm">Scraping product page and writing your script</p>
           </div>
         </div>
       )}
@@ -185,10 +185,10 @@ export default function Home() {
       {step === 'review' && (
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Sub-header */}
-          <div className="border-b border-zinc-200 bg-white px-6 py-3 flex items-center justify-between gap-4 shrink-0">
+          <div className="border-b border-border bg-card px-6 py-3 flex items-center justify-between gap-4 shrink-0">
             <button
               onClick={() => setStep('input')}
-              className="text-zinc-500 hover:text-zinc-900 text-sm flex items-center gap-1.5 transition-colors"
+              className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1.5 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -198,7 +198,7 @@ export default function Home() {
 
             <div className="flex items-center gap-2 min-w-0">
               <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-              <span className="text-sm text-zinc-500 truncate">
+              <span className="text-sm text-muted-foreground truncate">
                 {url || 'https://yourproduct.com'}
               </span>
             </div>
@@ -207,10 +207,10 @@ export default function Home() {
               onClick={handleCreateVideo}
               disabled={!productMedia}
               title={!productMedia ? 'Upload a product image or video first' : undefined}
-              className={`text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
+              className={`text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
                 productMedia
-                  ? 'bg-violet-600 hover:bg-violet-500 cursor-pointer'
-                  : 'bg-violet-300 cursor-not-allowed'
+                  ? 'bg-primary hover:bg-primary/90 cursor-pointer'
+                  : 'bg-primary/40 cursor-not-allowed'
               }`}
             >
               Create Video
@@ -220,15 +220,15 @@ export default function Home() {
           {/* Main content */}
           <div className="flex-1 flex overflow-hidden">
             {/* ── Left: Controls ── */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 bg-zinc-50">
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 bg-background">
 
               {/* Voiceover script */}
               <section className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-zinc-700">Voiceover Script</label>
+                  <label className="text-sm font-medium text-foreground">Voiceover Script</label>
                   <button
                     onClick={handleRegenerate}
-                    className="text-xs text-violet-600 hover:text-violet-500 transition-colors"
+                    className="text-xs text-primary hover:text-primary/80 transition-colors"
                   >
                     Regenerate
                   </button>
@@ -237,17 +237,17 @@ export default function Home() {
                   value={script}
                   onChange={(e) => setScript(e.target.value)}
                   rows={9}
-                  className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-zinc-800 text-sm leading-relaxed focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 resize-none placeholder:text-zinc-400 shadow-sm"
+                  className="w-full bg-card border border-border rounded-xl px-4 py-3 text-foreground text-sm leading-relaxed focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring resize-none placeholder:text-muted-foreground shadow-sm"
                 />
               </section>
 
               {/* Background Music */}
               <section className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-zinc-700">Background Music</label>
+                  <label className="text-sm font-medium text-foreground">Background Music</label>
                   <button
                     onClick={() => setMusicExpanded((v) => !v)}
-                    className="text-xs text-violet-600 hover:text-violet-500 transition-colors"
+                    className="text-xs text-primary hover:text-primary/80 transition-colors"
                   >
                     {musicExpanded ? 'Done' : 'Change'}
                   </button>
@@ -261,17 +261,17 @@ export default function Home() {
                         onClick={() => { setSelectedMusic('none'); setMusicExpanded(false) }}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all ${
                           selectedMusic === 'none'
-                            ? 'bg-violet-50 border-violet-300 ring-1 ring-violet-400'
-                            : 'bg-white border-zinc-200 hover:border-zinc-300'
+                            ? 'bg-secondary border-primary/50 ring-1 ring-ring'
+                            : 'bg-card border-border hover:border-ring/50'
                         }`}
                       >
-                        <div className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
-                          <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
+                          <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
                           </svg>
                         </div>
-                        <span className={`flex-1 text-left font-medium ${selectedMusic === 'none' ? 'text-violet-700' : 'text-zinc-700'}`}>
+                        <span className={`flex-1 text-left font-medium ${selectedMusic === 'none' ? 'text-primary' : 'text-foreground'}`}>
                           No music
                         </span>
                       </button>
@@ -286,29 +286,29 @@ export default function Home() {
                             onClick={() => { setSelectedMusic(track.url); setMusicExpanded(false) }}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all cursor-pointer ${
                               isSelected
-                                ? 'bg-violet-50 border-violet-300 ring-1 ring-violet-400'
-                                : 'bg-white border-zinc-200 hover:border-zinc-300'
+                                ? 'bg-secondary border-primary/50 ring-1 ring-ring'
+                                : 'bg-card border-border hover:border-ring/50'
                             }`}
                           >
                             <button
                               onClick={(e) => { e.stopPropagation(); togglePlay(track.url) }}
-                              className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-violet-100 flex items-center justify-center shrink-0 transition-colors"
+                              className="w-7 h-7 rounded-full bg-muted hover:bg-secondary flex items-center justify-center shrink-0 transition-colors"
                             >
                               {isPlaying ? (
-                                <svg className="w-3.5 h-3.5 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                                 </svg>
                               ) : (
-                                <svg className="w-3.5 h-3.5 text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-3.5 h-3.5 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M8 5v14l11-7z" />
                                 </svg>
                               )}
                             </button>
-                            <span className={`flex-1 text-left font-medium truncate ${isSelected ? 'text-violet-700' : 'text-zinc-700'}`}>
+                            <span className={`flex-1 text-left font-medium truncate ${isSelected ? 'text-primary' : 'text-foreground'}`}>
                               {displayName}
                             </span>
                             {isPlaying && (
-                              <span className="text-xs text-violet-500 font-medium shrink-0">Playing</span>
+                              <span className="text-xs text-primary font-medium shrink-0">Playing</span>
                             )}
                           </div>
                         )
@@ -323,33 +323,33 @@ export default function Home() {
                         ? track.name.replace(/[+_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
                         : 'No music'
                       return (
-                        <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-violet-50 border-violet-300 ring-1 ring-violet-400 text-sm">
+                        <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-secondary border-primary/50 ring-1 ring-ring text-sm">
                           {track ? (
                             <button
                               onClick={() => togglePlay(track.url)}
-                              className="w-7 h-7 rounded-full bg-violet-100 hover:bg-violet-200 flex items-center justify-center shrink-0 transition-colors"
+                              className="w-7 h-7 rounded-full bg-secondary hover:bg-secondary/80 flex items-center justify-center shrink-0 transition-colors"
                             >
                               {isPlaying ? (
-                                <svg className="w-3.5 h-3.5 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                                 </svg>
                               ) : (
-                                <svg className="w-3.5 h-3.5 text-violet-500" fill="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M8 5v14l11-7z" />
                                 </svg>
                               )}
                             </button>
                           ) : (
-                            <div className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
-                              <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
+                              <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
                               </svg>
                             </div>
                           )}
-                          <span className="flex-1 font-medium text-violet-700 truncate">{displayName}</span>
+                          <span className="flex-1 font-medium text-primary truncate">{displayName}</span>
                           {isPlaying && (
-                            <span className="text-xs text-violet-500 font-medium shrink-0">Playing</span>
+                            <span className="text-xs text-primary font-medium shrink-0">Playing</span>
                           )}
                         </div>
                       )
@@ -360,15 +360,15 @@ export default function Home() {
 
               {/* Avatar selection */}
               <section className="space-y-3">
-                <label className="text-sm font-medium text-zinc-700">Avatar</label>
+                <label className="text-sm font-medium text-foreground">Avatar</label>
                 <div className="flex gap-3">
                   {AVATARS.map((avatar) => (
                     <button
                       key={avatar.id}
                       onClick={() => setSelectedAvatar(avatar.id)}
                       className={`flex flex-col items-center gap-2 py-3 px-4 rounded-xl transition-all ${selectedAvatar === avatar.id
-                        ? 'bg-violet-50 ring-2 ring-violet-500'
-                        : 'hover:bg-zinc-100'
+                        ? 'bg-secondary ring-2 ring-primary'
+                        : 'hover:bg-muted'
                         }`}
                     >
                       <div className="w-16 h-20 rounded-xl overflow-hidden shadow-md">
@@ -380,7 +380,7 @@ export default function Home() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <span className="text-xs text-zinc-600 font-medium">{avatar.name}</span>
+                      <span className="text-xs text-muted-foreground font-medium">{avatar.name}</span>
                     </button>
                   ))}
                 </div>

@@ -48,9 +48,9 @@ export default function ProductMedia({ value, onChange }: Props) {
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-zinc-700">
+        <label className="text-sm font-medium text-foreground">
           Product Media
-          <span className="ml-1.5 text-xs text-red-500 font-normal">Required</span>
+          <span className="ml-1.5 text-xs text-destructive font-normal">Required</span>
         </label>
         {value && (
           <button
@@ -58,14 +58,14 @@ export default function ProductMedia({ value, onChange }: Props) {
               onChange(null)
               if (inputRef.current) inputRef.current.value = ''
             }}
-            className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             Remove
           </button>
         )}
       </div>
 
-      <div className="relative aspect-video bg-zinc-50 border border-zinc-200 rounded-xl overflow-hidden group shadow-sm">
+      <div className="relative aspect-video bg-muted border border-border rounded-xl overflow-hidden group shadow-sm">
         {value ? (
           value.type === 'image' ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -74,7 +74,7 @@ export default function ProductMedia({ value, onChange }: Props) {
             <video src={value.previewSrc} className="w-full h-full object-cover" muted loop autoPlay />
           )
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-zinc-400">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
             <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -83,19 +83,19 @@ export default function ProductMedia({ value, onChange }: Props) {
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span className="text-sm text-zinc-500">No media selected</span>
-            <span className="text-xs text-zinc-400">Upload an image or video below</span>
+            <span className="text-sm text-muted-foreground">No media selected</span>
+            <span className="text-xs text-muted-foreground">Upload an image or video below</span>
           </div>
         )}
 
         {/* Upload overlay */}
         {!uploading && (
-          <div className="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3">
-            <p className="text-sm text-zinc-700 font-medium">
+          <div className="absolute inset-0 bg-card/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3">
+            <p className="text-sm text-foreground font-medium">
               {value ? 'Replace media' : 'Upload media'}
             </p>
-            <label className="bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-800 text-sm px-4 py-2 rounded-lg cursor-pointer transition-colors flex items-center gap-2 shadow-sm">
-              <svg className="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <label className="bg-card hover:bg-muted border border-border text-foreground text-sm px-4 py-2 rounded-lg cursor-pointer transition-colors flex items-center gap-2 shadow-sm">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
               Image or Video
@@ -106,15 +106,15 @@ export default function ProductMedia({ value, onChange }: Props) {
 
         {/* Uploading spinner */}
         {uploading && (
-          <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center gap-2">
-            <div className="w-7 h-7 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
-            <p className="text-sm text-zinc-600">Uploading…</p>
+          <div className="absolute inset-0 bg-card/80 flex flex-col items-center justify-center gap-2">
+            <div className="w-7 h-7 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <p className="text-sm text-muted-foreground">Uploading…</p>
           </div>
         )}
       </div>
 
       {uploadError && (
-        <p className="text-xs text-red-500">{uploadError}</p>
+        <p className="text-xs text-destructive">{uploadError}</p>
       )}
     </section>
   )
