@@ -38,6 +38,7 @@ export default function Home() {
   const { isSignedIn } = useAuth()
   const [step, setStep] = useState<Step>('input')
   const [url, setUrl] = useState('')
+  const [urlError, setUrlError] = useState<string | null>(null)
   const [selectedAvatar, setSelectedAvatar] = useState(0)
   const defaultTrack = bgmTracks.find((t) => t.name === 'me-and-the-devil')!
   const [selectedMusic, setSelectedMusic] = useState<string>(defaultTrack.url)
@@ -47,6 +48,34 @@ export default function Home() {
   const [script, setScript] = useState(SAMPLE_SCRIPT)
   const [productMedia, setProductMedia] = useState<ProductMediaValue>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const URL_REGEX = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/
+
+  function stripProtocol(value: string) {
+    return value.replace(/^https?:\/\//i, '').replace(/^www\./i, 'www.')
+  }
+
+  function handleUrlChange(value: string) {
+    const stripped = stripProtocol(value)
+    setUrl(stripped)
+    setUrlError(null)
+  }
+
+  function validateUrl(): boolean {
+    if (!url.trim()) {
+      setUrlError('Please enter a URL')
+      return false
+    }
+    if (!URL_REGEX.test(url.trim())) {
+      setUrlError('Please enter a valid website (e.g. yourproduct.com)')
+      return false
+    }
+    return true
+  }
+
+  function fullUrl() {
+    return `https://${url.trim()}`
+  }
 
   function togglePlay(url: string) {
     if (playingTrack === url) {
@@ -65,14 +94,14 @@ export default function Home() {
   }
 
   async function handleGenerate() {
-    if (!url.trim()) return
+    if (!validateUrl()) return
     setError(null)
     setStep('generating')
     try {
       const res = await fetch('/api/generate-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: fullUrl() }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate script')
@@ -100,7 +129,7 @@ export default function Home() {
       const res = await fetch('/api/generate-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: fullUrl() }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to regenerate script')
@@ -139,9 +168,7 @@ export default function Home() {
                 AI-powered UGC video generator
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground">
-                Paste a link.
-                <br />
-                Get a UGC video.
+                Get Viral UGC Videos in minutes.
               </h1>
               <p className="text-muted-foreground text-base leading-relaxed max-w-sm mx-auto">
                 Drop in your product URL and we'll generate a review script, avatar voiceover, and
@@ -150,14 +177,17 @@ export default function Home() {
             </div>
 
             <div className="flex gap-2.5">
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && isSignedIn && handleGenerate()}
-                placeholder="https://yourproduct.com"
-                className="flex-1 bg-card border border-border rounded-xl px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring text-sm shadow-sm"
-              />
+              <div className={`flex flex-1 items-center bg-card border rounded-xl shadow-sm overflow-hidden focus-within:ring-1 focus-within:border-ring focus-within:ring-ring ${urlError ? 'border-destructive' : 'border-border'}`}>
+                <span className="pl-4 pr-2 text-sm text-muted-foreground select-none whitespace-nowrap">https://</span>
+                <input
+                  type="text"
+                  value={url}
+                  onChange={(e) => handleUrlChange(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && isSignedIn && handleGenerate()}
+                  placeholder="yourproduct.com/path"
+                  className="flex-1 bg-transparent py-3.5 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm"
+                />
+              </div>
               {isSignedIn ? (
                 <button
                   onClick={handleGenerate}
@@ -174,8 +204,8 @@ export default function Home() {
               )}
             </div>
 
-            {error && (
-              <p className="text-xs text-destructive text-center">{error}</p>
+            {(urlError || error) && (
+              <p className="text-xs text-destructive text-center">{urlError ?? error}</p>
             )}
             <p className="text-xs text-muted-foreground">
               Works with Shopify, Amazon, landing pages, and more
@@ -216,7 +246,7 @@ export default function Home() {
             <div className="flex items-center gap-2 min-w-0">
               <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
               <span className="text-sm text-muted-foreground truncate">
-                {url || 'https://yourproduct.com'}
+                {url ? fullUrl() : 'https://yourproduct.com'}
               </span>
             </div>
 
@@ -224,11 +254,10 @@ export default function Home() {
               onClick={handleCreateVideo}
               disabled={!productMedia}
               title={!productMedia ? 'Upload a product image or video first' : undefined}
-              className={`text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
-                productMedia
-                  ? 'bg-primary hover:bg-primary/90 cursor-pointer'
-                  : 'bg-primary/40 cursor-not-allowed'
-              }`}
+              className={`text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${productMedia
+                ? 'bg-primary hover:bg-primary/90 cursor-pointer'
+                : 'bg-primary/40 cursor-not-allowed'
+                }`}
             >
               Create Video
             </button>
@@ -276,11 +305,10 @@ export default function Home() {
                     <>
                       <button
                         onClick={() => { setSelectedMusic('none'); setMusicExpanded(false) }}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all ${
-                          selectedMusic === 'none'
-                            ? 'bg-accent border-primary/50 ring-1 ring-ring'
-                            : 'bg-card border-border hover:border-ring/50'
-                        }`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all ${selectedMusic === 'none'
+                          ? 'bg-accent border-primary/50 ring-1 ring-ring'
+                          : 'bg-card border-border hover:border-ring/50'
+                          }`}
                       >
                         <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
                           <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,11 +329,10 @@ export default function Home() {
                           <div
                             key={track.url}
                             onClick={() => { setSelectedMusic(track.url); setMusicExpanded(false) }}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-accent border-primary/50 ring-1 ring-ring'
-                                : 'bg-card border-border hover:border-ring/50'
-                            }`}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all cursor-pointer ${isSelected
+                              ? 'bg-accent border-primary/50 ring-1 ring-ring'
+                              : 'bg-card border-border hover:border-ring/50'
+                              }`}
                           >
                             <button
                               onClick={(e) => { e.stopPropagation(); togglePlay(track.url) }}
