@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { UserButton } from '@clerk/nextjs'
 
 const AVATARS = [
   { id: 0, name: 'Marcus', src: '/avatars/one.png' },
@@ -304,7 +305,7 @@ export default function GeneratingPage() {
         </div>
         <span className="font-semibold text-base tracking-tight">Moonriver</span>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-4">
           <button
             onClick={() => router.back()}
             className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1.5 transition-colors"
@@ -314,6 +315,7 @@ export default function GeneratingPage() {
             </svg>
             Back to editor
           </button>
+          <UserButton />
         </div>
       </header>
 

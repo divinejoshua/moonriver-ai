@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { useAuth, SignInButton, UserButton } from '@clerk/nextjs'
 import VideoPreview from './components/VideoPreview'
 import ProductMedia, { type ProductMediaValue } from './components/ProductMedia'
 import bgmTracks from '@/public/bgm.json'
@@ -34,6 +35,7 @@ type Step = 'input' | 'generating' | 'review'
 
 export default function Home() {
   const router = useRouter()
+  const { isSignedIn } = useAuth()
   const [step, setStep] = useState<Step>('input')
   const [url, setUrl] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState(0)
@@ -118,6 +120,17 @@ export default function Home() {
           </svg>
         </div>
         <span className="font-semibold text-base tracking-tight text-foreground">Moonriver</span>
+        <div className="ml-auto">
+          {isSignedIn ? (
+            <UserButton />
+          ) : (
+            <SignInButton mode="modal">
+              <button className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                Get Started
+              </button>
+            </SignInButton>
+          )}
+        </div>
       </header>
 
       {/* ── Step 1: URL input ── */}
@@ -145,16 +158,24 @@ export default function Home() {
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+                onKeyDown={(e) => e.key === 'Enter' && isSignedIn && handleGenerate()}
                 placeholder="https://yourproduct.com"
                 className="flex-1 bg-card border border-border rounded-xl px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring text-sm shadow-sm"
               />
-              <button
-                onClick={handleGenerate}
-                className="bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground font-semibold px-5 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap"
-              >
-                Generate
-              </button>
+              {isSignedIn ? (
+                <button
+                  onClick={handleGenerate}
+                  className="bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground font-semibold px-5 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap"
+                >
+                  Generate
+                </button>
+              ) : (
+                <SignInButton mode="modal">
+                  <button className="bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground font-semibold px-5 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap">
+                    Generate
+                  </button>
+                </SignInButton>
+              )}
             </div>
 
             {error && (

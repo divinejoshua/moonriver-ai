@@ -11,6 +11,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1014.0",
     "@aws-sdk/s3-request-presigner": "^3.1014.0",
+    "@clerk/nextjs": "^7.0.7",
     "@fal-ai/client": "^1.9.4",
     "@google/genai": "^1.46.0",
     "@napi-rs/canvas": "^0.1.97",
