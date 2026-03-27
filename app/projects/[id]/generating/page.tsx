@@ -71,6 +71,11 @@ export default function GeneratingPage({
           return
         }
         setProject(data)
+        if (data.final_video_url) {
+          setStages(INITIAL_STAGES.map((s) => ({ ...s, status: 'done' })))
+          setFinalVideoUrl(data.final_video_url)
+          return
+        }
         run(data)
       })
       .catch(() => router.replace('/'))
