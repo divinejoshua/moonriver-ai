@@ -89,14 +89,14 @@ export default function Home() {
       {/* URL input */}
       {step === 'input' && (
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-20">
-          <div className="w-full max-w-xl space-y-8 text-center">
+          <div className="w-full max-w-2xl space-y-8 text-center">
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 bg-accent border border-primary/30 text-accent-foreground text-xs font-medium px-3 py-1 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                 AI-powered UGC video generator
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground">
-                Get Viral UGC Videos in minutes.
+                Create Viral UGC Videos in minutes.
               </h1>
               <p className="text-muted-foreground text-base leading-relaxed max-w-sm mx-auto">
                 Drop in your product URL and we'll generate a review script, avatar voiceover, and
