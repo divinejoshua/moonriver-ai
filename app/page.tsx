@@ -114,11 +114,7 @@ export default function Home() {
     <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       {/* ── Header ── */}
       <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-          <svg className="w-4 h-4 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M15 10l4.553-2.277A1 1 0 0121 8.764v6.472a1 1 0 01-1.447.894L15 14v-4zM3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
-          </svg>
-        </div>
+        <Image src="/logo.png" alt="Moonriver" width={28} height={28} className="shrink-0" />
         <span className="font-semibold text-base tracking-tight text-foreground">Moonriver</span>
         <div className="ml-auto">
           {isSignedIn ? (
