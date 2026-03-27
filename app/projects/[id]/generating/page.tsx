@@ -323,15 +323,10 @@ export default function GeneratingPage({
                   <p className="text-xs text-muted-foreground">Product media + {avatar.name} · Ready to post</p>
                 </div>
                 <button
-                  onClick={async () => {
-                    const res = await fetch(finalVideoUrl)
-                    const blob = await res.blob()
-                    const url = URL.createObjectURL(blob)
+                  onClick={() => {
                     const a = document.createElement('a')
-                    a.href = url
-                    a.download = 'moonriver_ugc.mp4'
+                    a.href = `/api/download?url=${encodeURIComponent(finalVideoUrl)}&filename=moonriver_ugc.mp4`
                     a.click()
-                    URL.revokeObjectURL(url)
                   }}
                   className="ml-auto text-xs font-medium text-primary hover:text-primary/80 transition-colors"
                 >

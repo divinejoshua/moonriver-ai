@@ -40,15 +40,10 @@ function StatusBadge({ status }: { status: ProjectSummary['status'] }) {
   )
 }
 
-async function downloadVideo(url: string) {
-  const res = await fetch(url)
-  const blob = await res.blob()
-  const objectUrl = URL.createObjectURL(blob)
+function downloadVideo(url: string) {
   const a = document.createElement('a')
-  a.href = objectUrl
-  a.download = 'moonriver_ugc.mp4'
+  a.href = `/api/download?url=${encodeURIComponent(url)}&filename=moonriver_ugc.mp4`
   a.click()
-  URL.revokeObjectURL(objectUrl)
 }
 
 export default function HistoryPage() {
@@ -56,7 +51,6 @@ export default function HistoryPage() {
   const { isSignedIn, isLoaded } = useAuth()
   const [projects, setProjects] = useState<ProjectSummary[]>([])
   const [loading, setLoading] = useState(true)
-  const [downloading, setDownloading] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isLoaded) return
@@ -165,15 +159,10 @@ export default function HistoryPage() {
                     <div className="flex items-center gap-3 pt-1 border-t border-border">
                       {project.status === 'done' && project.final_video_url && (
                         <button
-                          onClick={async () => {
-                            setDownloading(project.id)
-                            await downloadVideo(project.final_video_url!)
-                            setDownloading(null)
-                          }}
-                          disabled={downloading === project.id}
-                          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+                          onClick={() => downloadVideo(project.final_video_url!)}
+                          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
                         >
-                          {downloading === project.id ? 'Downloading…' : 'Download'}
+                          Download
                         </button>
                       )}
                       <button
