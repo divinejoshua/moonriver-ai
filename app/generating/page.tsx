@@ -419,7 +419,7 @@ export default function GeneratingPage() {
                   Download
                 </a>
               </div>
-              <video controls src={mergedVideoUrl} className="w-full rounded-xl" />
+              <video controls src={mergedVideoUrl} className="w-48 rounded-xl mx-auto block border" />
             </div>
           )}
 
