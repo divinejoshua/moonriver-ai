@@ -60,10 +60,21 @@ export default function ProjectPage({
       .catch(() => router.replace('/'))
   }, [id, router])
 
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause()
+    }
+  }, [])
+
+  function stopAudio() {
+    audioRef.current?.pause()
+    audioRef.current = null
+    setPlayingTrack(null)
+  }
+
   function togglePlay(trackUrl: string) {
     if (playingTrack === trackUrl) {
-      audioRef.current?.pause()
-      setPlayingTrack(null)
+      stopAudio()
     } else {
       if (audioRef.current) audioRef.current.pause()
       const audio = new Audio(trackUrl)
@@ -93,6 +104,7 @@ export default function ProjectPage({
 
   async function handleCreateVideo() {
     if (!productMedia) return
+    stopAudio()
     setSaving(true)
     setError(null)
     try {
