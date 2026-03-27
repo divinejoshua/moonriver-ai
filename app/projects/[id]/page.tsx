@@ -133,8 +133,10 @@ export default function ProjectPage({
     <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       {/* Header */}
       <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3 shrink-0">
-        <Image src="/logo.png" alt="Moonriver" width={28} height={28} className="shrink-0" />
-        <span className="font-semibold text-base tracking-tight text-foreground">Moonriver</span>
+        <a href="/" className="flex items-center gap-3">
+          <Image src="/logo.png" alt="Moonriver" width={28} height={28} className="shrink-0" />
+          <span className="font-semibold text-base tracking-tight text-foreground">Moonriver</span>
+        </a>
         <div className="ml-auto">
           <UserButton />
         </div>

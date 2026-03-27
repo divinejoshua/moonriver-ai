@@ -288,8 +288,10 @@ export default function GeneratingPage({
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3 shrink-0 sticky top-0 z-10">
-        <img src="/logo.png" alt="Moonriver" width={28} height={28} className="shrink-0" />
-        <span className="font-semibold text-base tracking-tight">Moonriver</span>
+        <a href="/" className="flex items-center gap-3">
+          <img src="/logo.png" alt="Moonriver" width={28} height={28} className="shrink-0" />
+          <span className="font-semibold text-base tracking-tight">Moonriver</span>
+        </a>
 
         <div className="ml-auto flex items-center gap-4">
           <button
