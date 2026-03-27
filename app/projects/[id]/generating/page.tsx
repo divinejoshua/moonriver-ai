@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
+import type { Project } from '@/lib/supabase'
 
 const AVATARS = [
   { id: 0, name: 'Marcus', src: '/avatars/one.png' },
@@ -26,101 +27,75 @@ interface Stage {
 }
 
 const INITIAL_STAGES: Stage[] = [
-  {
-    id: 'audio',
-    label: 'Generating voiceover',
-    description: 'Synthesising speech',
-    status: 'pending',
-  },
-  {
-    id: 'lipsync',
-    label: 'Generating lipsync',
-    description: 'Adding lip sync to avatar',
-    status: 'pending',
-  },
-  {
-    id: 'merge',
-    label: 'Merging video',
-    description: 'Combining product media with lipsync',
-    status: 'pending',
-  },
-  {
-    id: 'caption',
-    label: 'Adding captions',
-    description: 'Burning voiceover script as captions',
-    status: 'pending',
-  },
-  {
-    id: 'bgm',
-    label: 'Adding background music',
-    description: 'Mixing in background track at low volume',
-    status: 'pending',
-  },
+  { id: 'audio', label: 'Generating voiceover', description: 'Synthesising speech', status: 'pending' },
+  { id: 'lipsync', label: 'Generating lipsync', description: 'Adding lip sync to avatar', status: 'pending' },
+  { id: 'merge', label: 'Merging video', description: 'Combining product media with lipsync', status: 'pending' },
+  { id: 'caption', label: 'Adding captions', description: 'Burning voiceover script as captions', status: 'pending' },
+  { id: 'bgm', label: 'Adding background music', description: 'Mixing in background track at low volume', status: 'pending' },
 ]
 
-export default function GeneratingPage() {
+export default function GeneratingPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = use(params)
   const router = useRouter()
   const [stages, setStages] = useState<Stage[]>(INITIAL_STAGES)
-  const [audioUrl, setAudioUrl] = useState<string | null>(null)
-  const [videoUrl, setVideoUrl] = useState<string | null>(null)
-  const [mergedVideoUrl, setMergedVideoUrl] = useState<string | null>(null)
+  const [finalVideoUrl, setFinalVideoUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [avatarId, setAvatarId] = useState(0)
+  const [project, setProject] = useState<Project | null>(null)
   const hasStarted = useRef(false)
 
-  function setStageStatus(id: string, status: StageStatus) {
-    setStages((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)))
+  function setStageStatus(stageId: string, status: StageStatus) {
+    setStages((prev) => prev.map((s) => (s.id === stageId ? { ...s, status } : s)))
+  }
+
+  async function saveProject(updates: Partial<Project>) {
+    await fetch(`/api/projects/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    })
   }
 
   useEffect(() => {
     if (hasStarted.current) return
     hasStarted.current = true
 
-    const raw = sessionStorage.getItem('ugc_job')
-    if (!raw) {
-      router.replace('/')
-      return
-    }
-    sessionStorage.removeItem('ugc_job')
-
-    const { script, selectedAvatar, productMediaUrl, productMediaType, musicUrl } = JSON.parse(raw) as {
-      script: string
-      selectedAvatar: number
-      productMediaUrl: string
-      productMediaType: 'image' | 'video'
-      musicUrl: string | null
-    }
-
-    setAvatarId(selectedAvatar)
-    run(script, selectedAvatar, productMediaUrl, productMediaType, musicUrl)
+    fetch(`/api/projects/${id}`)
+      .then((r) => r.json())
+      .then((data: Project & { error?: string }) => {
+        if (data.error || !data.script || !data.product_media_url) {
+          router.replace('/')
+          return
+        }
+        setProject(data)
+        run(data)
+      })
+      .catch(() => router.replace('/'))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function run(
-    script: string,
-    selectedAvatar: number,
-    productMediaUrl: string,
-    productMediaType: 'image' | 'video',
-    musicUrl: string | null,
-  ) {
+  async function run(p: Project) {
+    const { script, selected_avatar, product_media_url, product_media_type, music_url } = p
+
     // Stage: audio
     setStageStatus('audio', 'active')
     let audioDataUri: string | null = null
     try {
       const devAudioUrl = process.env.NEXT_PUBLIC_DEV_AUDIO_URL
       if (devAudioUrl) {
-        // DEV: skip ElevenLabs API call and fetch the mock audio directly
         const res = await fetch(devAudioUrl)
         if (!res.ok) throw new Error('Failed to fetch dev audio')
         const blob = await res.blob()
-        setAudioUrl(URL.createObjectURL(blob))
         const arrayBuffer = await blob.arrayBuffer()
         const uint8 = new Uint8Array(arrayBuffer)
         let binary = ''
         uint8.forEach((b) => { binary += String.fromCharCode(b) })
         audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
       } else {
-        const voiceId = AVATAR_VOICE_MAP[selectedAvatar]
+        const voiceId = AVATAR_VOICE_MAP[selected_avatar]
         const res = await fetch('/api/generate-audio', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -131,18 +106,17 @@ export default function GeneratingPage() {
           throw new Error(data.error ?? 'Failed to generate audio')
         }
         const blob = await res.blob()
-        setAudioUrl(URL.createObjectURL(blob))
         const arrayBuffer = await blob.arrayBuffer()
         const uint8 = new Uint8Array(arrayBuffer)
         let binary = ''
         uint8.forEach((b) => { binary += String.fromCharCode(b) })
         audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
       }
-
       setStageStatus('audio', 'done')
     } catch (err) {
       setStageStatus('audio', 'error')
       setError(err instanceof Error ? err.message : 'Audio generation failed')
+      await saveProject({ status: 'error' })
       return
     }
 
@@ -150,7 +124,6 @@ export default function GeneratingPage() {
     setStageStatus('lipsync', 'active')
     let lipsyncVideoUrl: string | null = null
     try {
-      // DEV: skip VEED API call and use a local mock URL
       const devLipsyncUrl = process.env.NEXT_PUBLIC_DEV_LIPSYNC_URL
       if (devLipsyncUrl) {
         lipsyncVideoUrl = devLipsyncUrl
@@ -158,7 +131,7 @@ export default function GeneratingPage() {
         const res = await fetch('/api/generate-lipsync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ audioBase64: audioDataUri, avatarId: selectedAvatar }),
+          body: JSON.stringify({ audioBase64: audioDataUri, avatarId: selected_avatar }),
         })
         if (!res.ok) {
           const data = await res.json()
@@ -167,31 +140,33 @@ export default function GeneratingPage() {
         const data = await res.json()
         lipsyncVideoUrl = data.videoUrl
       }
-      setVideoUrl(lipsyncVideoUrl)
+      await saveProject({ lipsync_video_url: lipsyncVideoUrl })
       setStageStatus('lipsync', 'done')
     } catch (err) {
       setStageStatus('lipsync', 'error')
       setError(err instanceof Error ? err.message : 'Lipsync generation failed')
+      await saveProject({ status: 'error' })
       return
     }
 
     // Stage: merge
     const devCaptionedUrl = process.env.NEXT_PUBLIC_DEV_CAPTIONED_URL
     if (devCaptionedUrl) {
-      // DEV: skip merge + caption pipeline and use pre-generated captioned video
       setStageStatus('merge', 'done')
       setStageStatus('caption', 'done')
-      // bgm still runs after this — fall through with captionedUrl
-      const captionedUrlDev = devCaptionedUrl
-      const devBgmUrlEarly = process.env.NEXT_PUBLIC_DEV_BGM_URL
-      if (devBgmUrlEarly) {
+      await saveProject({ captioned_video_url: devCaptionedUrl })
+
+      const devBgmUrl = process.env.NEXT_PUBLIC_DEV_BGM_URL
+      if (devBgmUrl) {
         setStageStatus('bgm', 'done')
-        setMergedVideoUrl(devBgmUrlEarly)
+        setFinalVideoUrl(devBgmUrl)
+        await saveProject({ final_video_url: devBgmUrl, status: 'done' })
         return
       }
-      if (!musicUrl) {
+      if (!music_url) {
         setStageStatus('bgm', 'done')
-        setMergedVideoUrl(captionedUrlDev)
+        setFinalVideoUrl(devCaptionedUrl)
+        await saveProject({ final_video_url: devCaptionedUrl, status: 'done' })
         return
       }
       setStageStatus('bgm', 'active')
@@ -199,28 +174,31 @@ export default function GeneratingPage() {
         const res = await fetch('/api/add-bgm', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ videoUrl: captionedUrlDev, musicUrl }),
+          body: JSON.stringify({ videoUrl: devCaptionedUrl, musicUrl: music_url }),
         })
         if (!res.ok) {
           const data = await res.json()
           throw new Error(data.error ?? 'Failed to add background music')
         }
         const data = await res.json()
-        setMergedVideoUrl(data.finalVideoUrl)
+        setFinalVideoUrl(data.finalVideoUrl)
+        await saveProject({ final_video_url: data.finalVideoUrl, status: 'done' })
         setStageStatus('bgm', 'done')
       } catch (err) {
         setStageStatus('bgm', 'error')
         setError(err instanceof Error ? err.message : 'Background music failed')
+        await saveProject({ status: 'error' })
       }
       return
     }
+
     setStageStatus('merge', 'active')
     let mergedUrl: string | null = null
     try {
       const res = await fetch('/api/merge-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lipsyncVideoUrl, productMediaUrl, productMediaType }),
+        body: JSON.stringify({ lipsyncVideoUrl, productMediaUrl: product_media_url, productMediaType: product_media_type }),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -228,10 +206,12 @@ export default function GeneratingPage() {
       }
       const data = await res.json()
       mergedUrl = data.mergedVideoUrl
+      await saveProject({ merged_video_url: mergedUrl })
       setStageStatus('merge', 'done')
     } catch (err) {
       setStageStatus('merge', 'error')
       setError(err instanceof Error ? err.message : 'Video merge failed')
+      await saveProject({ status: 'error' })
       return
     }
 
@@ -250,24 +230,27 @@ export default function GeneratingPage() {
       }
       const data = await res.json()
       captionedUrl = data.captionedVideoUrl
+      await saveProject({ captioned_video_url: captionedUrl })
       setStageStatus('caption', 'done')
     } catch (err) {
       setStageStatus('caption', 'error')
       setError(err instanceof Error ? err.message : 'Caption generation failed')
+      await saveProject({ status: 'error' })
       return
     }
 
     // Stage: bgm
     const devBgmUrl = process.env.NEXT_PUBLIC_DEV_BGM_URL
     if (devBgmUrl) {
-      // DEV: skip bgm pipeline and use pre-generated final video
       setStageStatus('bgm', 'done')
-      setMergedVideoUrl(devBgmUrl)
+      setFinalVideoUrl(devBgmUrl)
+      await saveProject({ final_video_url: devBgmUrl, status: 'done' })
       return
     }
-    if (!musicUrl) {
+    if (!music_url) {
       setStageStatus('bgm', 'done')
-      setMergedVideoUrl(captionedUrl)
+      setFinalVideoUrl(captionedUrl)
+      await saveProject({ final_video_url: captionedUrl, status: 'done' })
       return
     }
     setStageStatus('bgm', 'active')
@@ -275,24 +258,26 @@ export default function GeneratingPage() {
       const res = await fetch('/api/add-bgm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: captionedUrl, musicUrl }),
+        body: JSON.stringify({ videoUrl: captionedUrl, musicUrl: music_url }),
       })
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.error ?? 'Failed to add background music')
       }
       const data = await res.json()
-      setMergedVideoUrl(data.finalVideoUrl)
+      setFinalVideoUrl(data.finalVideoUrl)
+      await saveProject({ final_video_url: data.finalVideoUrl, status: 'done' })
       setStageStatus('bgm', 'done')
     } catch (err) {
       setStageStatus('bgm', 'error')
       setError(err instanceof Error ? err.message : 'Background music failed')
+      await saveProject({ status: 'error' })
     }
   }
 
   const allDone = stages.every((s) => s.status === 'done')
   const hasError = stages.some((s) => s.status === 'error')
-  const avatar = AVATARS[avatarId]
+  const avatar = AVATARS[project?.selected_avatar ?? 0]
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -303,7 +288,7 @@ export default function GeneratingPage() {
 
         <div className="ml-auto flex items-center gap-4">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push(`/projects/${id}`)}
             className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1.5 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -326,7 +311,7 @@ export default function GeneratingPage() {
             </h2>
             <p className="text-sm text-muted-foreground">
               {allDone
-                ? 'Your merged UGC video is ready below.'
+                ? 'Your UGC video is ready below.'
                 : hasError
                   ? 'One or more stages failed. Go back and try again.'
                   : 'Sit tight while we build each asset.'}
@@ -337,7 +322,6 @@ export default function GeneratingPage() {
           <div className="bg-card border border-border rounded-2xl divide-y divide-border shadow-sm overflow-hidden">
             {stages.map((stage) => (
               <div key={stage.id} className="flex items-center gap-4 px-5 py-4">
-                {/* Status icon */}
                 <div className="shrink-0 w-7 h-7 flex items-center justify-center">
                   {stage.status === 'done' && (
                     <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -361,20 +345,20 @@ export default function GeneratingPage() {
                   )}
                 </div>
 
-                {/* Stage info */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${stage.status === 'pending' ? 'text-muted-foreground' :
+                  <p className={`text-sm font-medium ${
+                    stage.status === 'pending' ? 'text-muted-foreground' :
                     stage.status === 'error' ? 'text-destructive' : 'text-foreground'
-                    }`}>
+                  }`}>
                     {stage.label}
                   </p>
-                  <p className={`text-xs mt-0.5 ${stage.status === 'pending' ? 'text-muted-foreground/50' : 'text-muted-foreground'
-                    }`}>
+                  <p className={`text-xs mt-0.5 ${
+                    stage.status === 'pending' ? 'text-muted-foreground/50' : 'text-muted-foreground'
+                  }`}>
                     {stage.description}
                   </p>
                 </div>
 
-                {/* Stage badge */}
                 <div className="shrink-0">
                   {stage.status === 'active' && (
                     <span className="text-xs font-medium text-accent-foreground bg-accent px-2 py-0.5 rounded-full">
@@ -396,8 +380,8 @@ export default function GeneratingPage() {
             ))}
           </div>
 
-          {/* Merged final video */}
-          {mergedVideoUrl && (
+          {/* Final video */}
+          {finalVideoUrl && (
             <div className="bg-card border border-emerald-200 rounded-2xl p-5 shadow-sm space-y-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
@@ -410,23 +394,21 @@ export default function GeneratingPage() {
                   <p className="text-xs text-muted-foreground">Product media + {avatar.name} · Ready to post</p>
                 </div>
                 <a
-                  href={mergedVideoUrl}
+                  href={finalVideoUrl}
                   download="moonriver_ugc.mp4"
                   className="ml-auto text-xs font-medium text-primary hover:text-primary/80 transition-colors"
                 >
                   Download
                 </a>
               </div>
-              <video controls src={mergedVideoUrl} className="w-48 rounded-xl mx-auto block border" />
+              <video controls src={finalVideoUrl} className="w-48 rounded-xl mx-auto block border" />
             </div>
           )}
 
-          {/* Error */}
           {error && (
             <p className="text-xs text-destructive text-center">{error}</p>
           )}
 
-          {/* Bottom padding so content clears the viewport */}
           <div className="h-8" />
         </div>
       </main>
