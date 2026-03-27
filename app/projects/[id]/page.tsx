@@ -4,6 +4,7 @@ import { use, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { UserButton } from '@clerk/nextjs'
+import Header from '@/app/components/Header'
 import VideoPreview from '@/app/components/VideoPreview'
 import ProductMedia, { type ProductMediaValue } from '@/app/components/ProductMedia'
 import bgmTracks from '@/public/bgm.json'
@@ -131,16 +132,9 @@ export default function ProjectPage({
 
   return (
     <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3 shrink-0">
-        <a href="/" className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Moonriver" width={28} height={28} className="shrink-0" />
-          <span className="font-semibold text-base tracking-tight text-foreground">Moonriver</span>
-        </a>
-        <div className="ml-auto">
-          <UserButton />
-        </div>
-      </header>
+      <Header>
+        <UserButton />
+      </Header>
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Sub-header */}

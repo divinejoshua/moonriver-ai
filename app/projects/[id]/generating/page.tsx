@@ -3,6 +3,7 @@
 import { use, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
+import Header from '@/app/components/Header'
 import type { Project } from '@/lib/supabase'
 
 const AVATARS = [
@@ -286,26 +287,18 @@ export default function GeneratingPage({
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Header */}
-      <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3 shrink-0 sticky top-0 z-10">
-        <a href="/" className="flex items-center gap-3">
-          <img src="/logo.png" alt="Moonriver" width={28} height={28} className="shrink-0" />
-          <span className="font-semibold text-base tracking-tight">Moonriver</span>
-        </a>
-
-        <div className="ml-auto flex items-center gap-4">
-          <button
-            onClick={() => router.push(`/projects/${id}`)}
-            className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1.5 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to editor
-          </button>
-          <UserButton />
-        </div>
-      </header>
+      <Header sticky>
+        <button
+          onClick={() => router.push(`/projects/${id}`)}
+          className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1.5 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to editor
+        </button>
+        <UserButton />
+      </Header>
 
       {/* Scrollable content */}
       <main className="flex-1 overflow-y-auto py-12 px-4">
