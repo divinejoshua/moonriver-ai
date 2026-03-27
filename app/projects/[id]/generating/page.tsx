@@ -323,6 +323,39 @@ export default function GeneratingPage({
             </p>
           </div>
 
+          {/* Final video — shown above stages when ready */}
+          {finalVideoUrl && (
+            <div className="bg-card border border-emerald-200 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">Final Video</p>
+                  <p className="text-xs text-muted-foreground">Product media + {avatar.name} · Ready to post</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    const res = await fetch(finalVideoUrl)
+                    const blob = await res.blob()
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = 'moonriver_ugc.mp4'
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }}
+                  className="ml-auto text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  Download
+                </button>
+              </div>
+              <video controls src={finalVideoUrl} className="w-48 rounded-xl mx-auto block border" />
+            </div>
+          )}
+
           {/* Stage list */}
           <div className="bg-card border border-border rounded-2xl divide-y divide-border shadow-sm overflow-hidden">
             {stages.map((stage) => (
@@ -384,31 +417,6 @@ export default function GeneratingPage({
               </div>
             ))}
           </div>
-
-          {/* Final video */}
-          {finalVideoUrl && (
-            <div className="bg-card border border-emerald-200 rounded-2xl p-5 shadow-sm space-y-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">Final Video</p>
-                  <p className="text-xs text-muted-foreground">Product media + {avatar.name} · Ready to post</p>
-                </div>
-                <a
-                  href={finalVideoUrl}
-                  download="moonriver_ugc.mp4"
-                  className="ml-auto text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  Download
-                </a>
-              </div>
-              <video controls src={finalVideoUrl} className="w-48 rounded-xl mx-auto block border" />
-            </div>
-          )}
 
           {error && (
             <p className="text-xs text-destructive text-center">{error}</p>
