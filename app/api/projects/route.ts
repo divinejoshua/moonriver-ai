@@ -20,12 +20,19 @@ export async function POST(req: Request) {
   const { userId } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { url, script } = await req.json()
+  const { url, script, product_media_url, product_media_type } = await req.json()
   if (!url) return Response.json({ error: 'Missing url' }, { status: 400 })
 
   const { data, error } = await supabase
     .from('projects')
-    .insert({ user_id: userId, url, script: script ?? null, status: 'draft' })
+    .insert({
+      user_id: userId,
+      url,
+      script: script ?? null,
+      product_media_url: product_media_url ?? null,
+      product_media_type: product_media_type ?? null,
+      status: 'draft',
+    })
     .select('id')
     .single()
 

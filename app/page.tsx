@@ -47,20 +47,36 @@ export default function Home() {
     setError(null)
     setStep('generating')
     try {
-      // Generate script
-      const scriptRes = await fetch('/api/generate-script', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: fullUrl() }),
-      })
+      // Generate script and screenshot in parallel
+      const [scriptRes, screenshotRes] = await Promise.all([
+        fetch('/api/generate-script', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: fullUrl() }),
+        }),
+        fetch('/api/screenshot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: fullUrl() }),
+        }),
+      ])
+
       const scriptData = await scriptRes.json()
       if (!scriptRes.ok) throw new Error(scriptData.error ?? 'Failed to generate script')
+
+      // Screenshot is best-effort — don't fail if it errors
+      const screenshotData = screenshotRes.ok ? await screenshotRes.json() : null
 
       // Create project in Supabase
       const projectRes = await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: fullUrl(), script: scriptData.script }),
+        body: JSON.stringify({
+          url: fullUrl(),
+          script: scriptData.script,
+          product_media_url: screenshotData?.url ?? null,
+          product_media_type: screenshotData?.url ? 'image' : null,
+        }),
       })
       const projectData = await projectRes.json()
       if (!projectRes.ok) throw new Error(projectData.error ?? 'Failed to create project')
