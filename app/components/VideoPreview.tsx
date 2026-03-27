@@ -24,15 +24,15 @@ export default function VideoPreview({ selectedAvatar, productMedia }: Props) {
       >
         {/* Top segment — Product media (60%) */}
         <div
-          className="absolute top-0 left-0 right-0 bg-muted overflow-hidden"
+          className="absolute top-0 left-0 right-0 bg-black overflow-hidden"
           style={{ height: '60%' }}
         >
           {productMedia ? (
             productMedia.type === 'image' ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={productMedia.previewSrc} alt="Product" className="w-full h-full object-cover" />
+              <img src={productMedia.previewSrc} alt="Product" className="w-full h-full object-contain" />
             ) : (
-              <video src={productMedia.previewSrc} className="w-full h-full object-cover" muted loop autoPlay />
+              <video src={productMedia.previewSrc} className="w-full h-full object-contain" muted loop autoPlay />
             )
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2">
