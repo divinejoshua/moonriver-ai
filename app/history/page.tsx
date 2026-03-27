@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
+import { useAuth, UserButton } from '@clerk/nextjs'
 import Header from '@/app/components/Header'
 
 const AVATARS = [
@@ -53,11 +53,14 @@ async function downloadVideo(url: string) {
 
 export default function HistoryPage() {
   const router = useRouter()
+  const { isSignedIn, isLoaded } = useAuth()
   const [projects, setProjects] = useState<ProjectSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [downloading, setDownloading] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!isLoaded) return
+    if (!isSignedIn) { router.replace('/'); return }
     fetch('/api/projects')
       .then((r) => r.json())
       .then((data) => {
@@ -65,7 +68,7 @@ export default function HistoryPage() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [])
+  }, [isLoaded, isSignedIn, router])
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
