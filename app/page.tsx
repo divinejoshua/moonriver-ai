@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth, SignInButton, UserButton } from '@clerk/nextjs'
+import { useAuth, useClerk, SignInButton, UserButton } from '@clerk/nextjs'
 import Header from './components/Header'
 
 type Step = 'input' | 'generating'
@@ -12,6 +12,7 @@ const PENDING_URL_KEY = 'moonriver_pending_url'
 export default function Home() {
   const router = useRouter()
   const { isSignedIn, isLoaded } = useAuth()
+  const { openSignIn } = useClerk()
   const [step, setStep] = useState<Step>('input')
   const [url, setUrl] = useState('')
   const [urlError, setUrlError] = useState<string | null>(null)
@@ -164,7 +165,15 @@ export default function Home() {
                   type="text"
                   value={url}
                   onChange={(e) => handleUrlChange(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && isSignedIn && handleGenerate()}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Enter') return
+                    if (isSignedIn) {
+                      handleGenerate()
+                    } else {
+                      handleUnauthenticatedGenerate()
+                      openSignIn()
+                    }
+                  }}
                   placeholder="yourproduct.com"
                   className="flex-1 bg-transparent py-3.5 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm"
                 />
