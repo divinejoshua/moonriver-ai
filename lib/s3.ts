@@ -10,8 +10,17 @@ const s3 = new S3Client({
 })
 
 const BUCKET = process.env.AWS_S3_BUCKET_NAME!
+const REGION = process.env.AWS_S3_REGION?.trim()!
 
 export type S3Folder = 'images' | 'audio' | 'lipsync' | 'merged' | 'product-images' | 'product-videos'
+
+/**
+ * Returns the plain (non-signed) S3 URL for a stored key.
+ * Use this for URLs that will be persisted to the database.
+ */
+export function getS3Url(key: string): string {
+  return `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`
+}
 
 /**
  * Extracts the S3 object key from a pre-signed URL, or returns the value

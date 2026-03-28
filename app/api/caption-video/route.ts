@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
-import { uploadToS3, getPresignedUrl } from '@/lib/s3'
+import { uploadToS3, getS3Url } from '@/lib/s3'
 import { captionVideo } from '@/lib/caption-video'
 
 export const maxDuration = 300
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
     const filename = `captioned_${Date.now()}.mp4`
     const key = await uploadToS3(await readFile(outputPath), 'merged', filename, 'video/mp4')
-    const captionedVideoUrl = await getPresignedUrl(key)
+    const captionedVideoUrl = getS3Url(key)
 
     return NextResponse.json({ captionedVideoUrl })
   } finally {

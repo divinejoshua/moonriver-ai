@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { uploadToS3, getPresignedUrl } from '@/lib/s3'
+import { uploadToS3, getS3Url } from '@/lib/s3'
 
 export async function POST(req: Request) {
   const formData = await req.formData()
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   const folder = file.type.startsWith('video/') ? 'product-videos' : 'product-images'
 
   const key = await uploadToS3(buffer, folder as 'images', filename, file.type)
-  const url = await getPresignedUrl(key)
+  const url = getS3Url(key)
 
   return NextResponse.json({ url })
 }

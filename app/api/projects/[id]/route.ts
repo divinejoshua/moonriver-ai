@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
 import { extractS3Key, getPresignedUrl } from '@/lib/s3'
 
-// Fields that store S3 object keys (or old pre-signed URLs that need normalising)
+// Fields that store plain S3 URLs — freshened to presigned URLs before returning to clients
 const S3_URL_FIELDS = [
   'product_media_url',
   'lipsync_video_url',
@@ -56,17 +56,9 @@ export async function PATCH(
   const { id } = await params
   const updates = await req.json()
 
-  // Normalise any S3 URL fields to plain keys before persisting
-  const normalized = { ...updates }
-  for (const field of S3_URL_FIELDS) {
-    if (typeof normalized[field] === 'string' && normalized[field]) {
-      normalized[field] = extractS3Key(normalized[field])
-    }
-  }
-
   const { error } = await supabase
     .from('projects')
-    .update({ ...normalized, updated_at: new Date().toISOString() })
+    .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('user_id', userId)
 

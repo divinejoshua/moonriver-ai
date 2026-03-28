@@ -1,7 +1,7 @@
 import { fal } from '@fal-ai/client'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { uploadToS3, getPresignedUrl } from '@/lib/s3'
+import { uploadToS3, getPresignedUrl, getS3Url } from '@/lib/s3'
 
 export const maxDuration = 120
 
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
   const videoBuffer = Buffer.from(await videoRes.arrayBuffer())
   const videoFilename = `lipsync-${Date.now()}.mp4`
   const videoKey = await uploadToS3(videoBuffer, 'lipsync', videoFilename, 'video/mp4')
-  const videoUrl = await getPresignedUrl(videoKey)
+  const videoUrl = getS3Url(videoKey)
 
   return Response.json({ videoUrl })
 }

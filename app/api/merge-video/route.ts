@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
-import { uploadToS3, getPresignedUrl } from '@/lib/s3'
+import { uploadToS3, getS3Url } from '@/lib/s3'
 import { mergeVideo } from '@/lib/merge-video'
 
 export const maxDuration = 120
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
     const filename = `merged_${Date.now()}.mp4`
     const key = await uploadToS3(await readFile(outputPath), 'merged', filename, 'video/mp4')
-    const mergedVideoUrl = await getPresignedUrl(key)
+    const mergedVideoUrl = getS3Url(key)
 
     return NextResponse.json({ mergedVideoUrl })
   } finally {

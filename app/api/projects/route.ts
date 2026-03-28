@@ -4,7 +4,7 @@ import { extractS3Key, getPresignedUrl } from '@/lib/s3'
 
 const USAGE_LIMIT = 20
 
-// Fields that store S3 object keys (or old pre-signed URLs that need normalising)
+// Fields that store plain S3 URLs — freshened to presigned URLs before returning to clients
 const S3_URL_FIELDS = [
   'product_media_url',
   'lipsync_video_url',
