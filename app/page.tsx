@@ -128,7 +128,7 @@ export default function Home() {
                   value={url}
                   onChange={(e) => handleUrlChange(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && isSignedIn && handleGenerate()}
-                  placeholder="yourproduct.com/path"
+                  placeholder="yourproduct.com"
                   className="flex-1 bg-transparent py-3.5 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm"
                 />
               </div>
