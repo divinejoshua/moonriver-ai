@@ -1,21 +1,31 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, SignInButton, UserButton } from '@clerk/nextjs'
 import Header from './components/Header'
 
 type Step = 'input' | 'generating'
 
+const PENDING_URL_KEY = 'moonriver_pending_url'
+
 export default function Home() {
   const router = useRouter()
-  const { isSignedIn } = useAuth()
+  const { isSignedIn, isLoaded } = useAuth()
   const [step, setStep] = useState<Step>('input')
   const [url, setUrl] = useState('')
   const [urlError, setUrlError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [usage, setUsage] = useState<{ used: number; limit: number; isAdmin: boolean } | null>(null)
+  const didAutoGenerate = useRef(false)
 
+  // Restore URL typed before sign-in
+  useEffect(() => {
+    const pending = sessionStorage.getItem(PENDING_URL_KEY)
+    if (pending) setUrl(pending)
+  }, [])
+
+  // Fetch usage once signed in
   useEffect(() => {
     if (!isSignedIn) return
     fetch('/api/usage')
@@ -23,6 +33,18 @@ export default function Home() {
       .then((data) => { if (!data.error) setUsage(data) })
       .catch(() => {})
   }, [isSignedIn])
+
+  // Auto-generate after sign-in if the user had typed a URL
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || didAutoGenerate.current) return
+    const pending = sessionStorage.getItem(PENDING_URL_KEY)
+    if (!pending) return
+    didAutoGenerate.current = true
+    sessionStorage.removeItem(PENDING_URL_KEY)
+    setUrl(pending)
+    handleGenerate(pending)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, isSignedIn])
 
   const URL_REGEX = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/
 
@@ -35,53 +57,55 @@ export default function Home() {
     setUrlError(null)
   }
 
-  function validateUrl(): boolean {
-    if (!url.trim()) {
+  function validateUrl(raw: string): boolean {
+    if (!raw.trim()) {
       setUrlError('Please enter a URL')
       return false
     }
-    if (!URL_REGEX.test(url.trim())) {
+    if (!URL_REGEX.test(raw.trim())) {
       setUrlError('Please enter a valid website (e.g. yourproduct.com)')
       return false
     }
     return true
   }
 
-  function fullUrl() {
-    return `https://${url.trim()}`
+  // Called by the unauthenticated Generate button to save URL before modal
+  function handleUnauthenticatedGenerate() {
+    const stripped = stripProtocol(url)
+    if (!validateUrl(stripped)) return
+    sessionStorage.setItem(PENDING_URL_KEY, stripped)
   }
 
-  async function handleGenerate() {
-    if (!validateUrl()) return
+  async function handleGenerate(urlOverride?: string) {
+    const raw = (urlOverride ?? url).trim()
+    if (!validateUrl(raw)) return
     setError(null)
     setStep('generating')
+    const target = `https://${raw}`
     try {
-      // Generate script and screenshot in parallel
       const [scriptRes, screenshotRes] = await Promise.all([
         fetch('/api/generate-script', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: fullUrl() }),
+          body: JSON.stringify({ url: target }),
         }),
         fetch('/api/screenshot', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: fullUrl() }),
+          body: JSON.stringify({ url: target }),
         }),
       ])
 
       const scriptData = await scriptRes.json()
       if (!scriptRes.ok) throw new Error(scriptData.error ?? 'Failed to generate script')
 
-      // Screenshot is best-effort — don't fail if it errors
       const screenshotData = screenshotRes.ok ? await screenshotRes.json() : null
 
-      // Create project in Supabase
       const projectRes = await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: fullUrl(),
+          url: target,
           script: scriptData.script,
           product_media_url: screenshotData?.url ?? null,
           product_media_type: screenshotData?.url ? 'image' : null,
@@ -147,14 +171,17 @@ export default function Home() {
               </div>
               {isSignedIn ? (
                 <button
-                  onClick={handleGenerate}
+                  onClick={() => handleGenerate()}
                   className="bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground font-semibold px-5 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap"
                 >
                   Generate
                 </button>
               ) : (
                 <SignInButton mode="modal">
-                  <button className="bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground font-semibold px-5 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap">
+                  <button
+                    onClick={handleUnauthenticatedGenerate}
+                    className="bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground font-semibold px-5 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap"
+                  >
                     Generate
                   </button>
                 </SignInButton>
