@@ -83,6 +83,8 @@ export default function GeneratingPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const devDelay = () => new Promise((resolve) => setTimeout(resolve, 2000))
+
   async function run(p: Project) {
     const { script, selected_avatar, product_media_url, product_media_type, music_url } = p
 
@@ -100,6 +102,7 @@ export default function GeneratingPage({
         let binary = ''
         uint8.forEach((b) => { binary += String.fromCharCode(b) })
         audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
+        await devDelay()
       } else {
         const voiceId = AVATAR_VOICE_MAP[selected_avatar]
         const res = await fetch('/api/generate-audio', {
@@ -133,6 +136,7 @@ export default function GeneratingPage({
       const devLipsyncUrl = process.env.NEXT_PUBLIC_DEV_LIPSYNC_URL
       if (devLipsyncUrl) {
         lipsyncVideoUrl = devLipsyncUrl
+        await devDelay()
       } else {
         const res = await fetch('/api/generate-lipsync', {
           method: 'POST',
@@ -158,12 +162,18 @@ export default function GeneratingPage({
     // Stage: merge
     const devCaptionedUrl = process.env.NEXT_PUBLIC_DEV_CAPTIONED_URL
     if (devCaptionedUrl) {
+      setStageStatus('merge', 'active')
+      await devDelay()
       setStageStatus('merge', 'done')
+      setStageStatus('caption', 'active')
+      await devDelay()
       setStageStatus('caption', 'done')
       await saveProject({ captioned_video_url: devCaptionedUrl })
 
       const devBgmUrl = process.env.NEXT_PUBLIC_DEV_BGM_URL
       if (devBgmUrl) {
+        setStageStatus('bgm', 'active')
+        await devDelay()
         setStageStatus('bgm', 'done')
         setFinalVideoUrl(devBgmUrl)
         await saveProject({ final_video_url: devBgmUrl, status: 'done' })
@@ -248,6 +258,8 @@ export default function GeneratingPage({
     // Stage: bgm
     const devBgmUrl = process.env.NEXT_PUBLIC_DEV_BGM_URL
     if (devBgmUrl) {
+      setStageStatus('bgm', 'active')
+      await devDelay()
       setStageStatus('bgm', 'done')
       setFinalVideoUrl(devBgmUrl)
       await saveProject({ final_video_url: devBgmUrl, status: 'done' })
