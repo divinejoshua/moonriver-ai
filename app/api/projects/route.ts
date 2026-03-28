@@ -50,10 +50,15 @@ export async function POST(req: Request) {
   const { userId } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Check admin status and enforce usage limit for non-admins
+  // Check payment + admin status
   const clerk = await clerkClient()
   const clerkUser = await clerk.users.getUser(userId)
   const isAdmin = clerkUser.publicMetadata?.admin === true
+  const isPaid = clerkUser.publicMetadata?.paid === true
+
+  if (!isPaid && !isAdmin) {
+    return Response.json({ error: 'Payment required.', paymentRequired: true }, { status: 403 })
+  }
 
   if (!isAdmin) {
     const { count } = await supabase
