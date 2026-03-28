@@ -1,5 +1,29 @@
 import { auth } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
+import { extractS3Key, getPresignedUrl } from '@/lib/s3'
+
+// Fields that store S3 object keys (or old pre-signed URLs that need normalising)
+const S3_URL_FIELDS = [
+  'product_media_url',
+  'lipsync_video_url',
+  'merged_video_url',
+  'captioned_video_url',
+  'final_video_url',
+] as const
+
+async function freshenUrls<T extends Record<string, unknown>>(row: T): Promise<T> {
+  const result = { ...row }
+  await Promise.all(
+    S3_URL_FIELDS.map(async (field) => {
+      const val = row[field]
+      if (typeof val === 'string' && val) {
+        const key = extractS3Key(val)
+        ;(result as Record<string, unknown>)[field] = await getPresignedUrl(key)
+      }
+    }),
+  )
+  return result
+}
 
 export async function GET(
   _req: Request,
@@ -19,7 +43,7 @@ export async function GET(
 
   if (error) return Response.json({ error: 'Not found' }, { status: 404 })
 
-  return Response.json(data)
+  return Response.json(await freshenUrls(data))
 }
 
 export async function PATCH(
@@ -32,9 +56,17 @@ export async function PATCH(
   const { id } = await params
   const updates = await req.json()
 
+  // Normalise any S3 URL fields to plain keys before persisting
+  const normalized = { ...updates }
+  for (const field of S3_URL_FIELDS) {
+    if (typeof normalized[field] === 'string' && normalized[field]) {
+      normalized[field] = extractS3Key(normalized[field])
+    }
+  }
+
   const { error } = await supabase
     .from('projects')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...normalized, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('user_id', userId)
 

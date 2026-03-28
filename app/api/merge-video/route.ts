@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
-import { uploadToS3 } from '@/lib/s3'
+import { uploadToS3, getPresignedUrl } from '@/lib/s3'
 import { mergeVideo } from '@/lib/merge-video'
 
 export const maxDuration = 120
@@ -57,7 +57,8 @@ export async function POST(req: Request) {
     await mergeVideo({ voiceover: lipsyncPath, product: productPath, output: outputPath })
 
     const filename = `merged_${Date.now()}.mp4`
-    const mergedVideoUrl = await uploadToS3(await readFile(outputPath), 'merged', filename, 'video/mp4')
+    const key = await uploadToS3(await readFile(outputPath), 'merged', filename, 'video/mp4')
+    const mergedVideoUrl = await getPresignedUrl(key)
 
     return NextResponse.json({ mergedVideoUrl })
   } finally {

@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer'
-import { uploadToS3 } from '@/lib/s3'
+import { uploadToS3, getPresignedUrl } from '@/lib/s3'
 
 export const maxDuration = 30
 
@@ -39,14 +39,15 @@ export async function POST(req: Request) {
     })
 
     const filename = `hero_${Date.now()}.jpg`
-    const s3Url = await uploadToS3(
+    const key = await uploadToS3(
       Buffer.from(screenshot),
       'product-images',
       filename,
       'image/jpeg',
     )
+    const url = await getPresignedUrl(key)
 
-    return Response.json({ url: s3Url })
+    return Response.json({ url })
   } catch {
     return Response.json({ error: 'Screenshot failed' }, { status: 500 })
   } finally {

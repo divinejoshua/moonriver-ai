@@ -14,8 +14,34 @@ const BUCKET = process.env.AWS_S3_BUCKET_NAME!
 export type S3Folder = 'images' | 'audio' | 'lipsync' | 'merged' | 'product-images' | 'product-videos'
 
 /**
- * Uploads a buffer to S3 under the given folder and returns a pre-signed
- * GET URL valid for 1 hour so external services (e.g. VEED) can fetch it.
+ * Extracts the S3 object key from a pre-signed URL, or returns the value
+ * unchanged if it's already a plain key (does not start with "https://").
+ * Used for backward compat with rows that stored full pre-signed URLs.
+ */
+export function extractS3Key(urlOrKey: string): string {
+  if (!urlOrKey.startsWith('https://')) return urlOrKey
+  try {
+    return new URL(urlOrKey).pathname.slice(1)
+  } catch {
+    return urlOrKey
+  }
+}
+
+/**
+ * Returns a fresh pre-signed GET URL for a stored S3 key.
+ * Default TTL: 1 day (86 400 s).
+ */
+export async function getPresignedUrl(key: string, expiresIn = 86400): Promise<string> {
+  return getSignedUrl(
+    s3,
+    new GetObjectCommand({ Bucket: BUCKET, Key: key }),
+    { expiresIn },
+  )
+}
+
+/**
+ * Uploads a buffer to S3 and returns the S3 key.
+ * Call getPresignedUrl(key) separately when you need a URL.
  */
 export async function uploadToS3(
   buffer: Buffer,
@@ -34,11 +60,5 @@ export async function uploadToS3(
     }),
   )
 
-  const url = await getSignedUrl(
-    s3,
-    new GetObjectCommand({ Bucket: BUCKET, Key: key }),
-    { expiresIn: 3600 },
-  )
-
-  return url
+  return key
 }
