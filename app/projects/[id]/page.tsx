@@ -9,12 +9,7 @@ import VideoPreview from '@/app/components/VideoPreview'
 import ProductMedia, { type ProductMediaValue } from '@/app/components/ProductMedia'
 import bgmTracks from '@/public/bgm.json'
 import type { Project } from '@/lib/supabase'
-
-const AVATARS = [
-  { id: 0, name: 'Marcus', src: '/avatars/one.png' },
-  { id: 1, name: 'Sophie', src: '/avatars/two.png' },
-  { id: 2, name: 'Jade', src: '/avatars/three.png' },
-]
+import { AVATARS } from '@/lib/constants'
 
 export default function ProjectPage({
   params,

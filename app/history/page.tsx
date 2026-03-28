@@ -4,12 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import Header from '@/app/components/Header'
-
-const AVATARS = [
-  { id: 0, name: 'Marcus' },
-  { id: 1, name: 'Sophie' },
-  { id: 2, name: 'Jade' },
-]
+import { AVATARS } from '@/lib/constants'
 
 type ProjectSummary = {
   id: string

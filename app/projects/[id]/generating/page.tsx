@@ -5,18 +5,7 @@ import { useRouter } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
 import Header from '@/app/components/Header'
 import type { Project } from '@/lib/supabase'
-
-const AVATARS = [
-  { id: 0, name: 'Marcus', src: '/avatars/one.png' },
-  { id: 1, name: 'Sophie', src: '/avatars/two.png' },
-  { id: 2, name: 'Jade', src: '/avatars/three.png' },
-]
-
-const AVATAR_VOICE_MAP: Record<number, string> = {
-  0: 'rdDUoCO1RjwdMmNjmhHV',
-  1: 'kXsOSDWolD7e9l1Z0sbH',
-  2: 'dMyQqiVXTU80dDl2eNK8',
-}
+import { AVATARS, AVATAR_VOICE_MAP } from '@/lib/constants'
 
 type StageStatus = 'pending' | 'active' | 'done' | 'error'
 
