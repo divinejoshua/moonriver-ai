@@ -79,6 +79,9 @@ export default function Home() {
         }),
       })
       const projectData = await projectRes.json()
+      if (projectRes.status === 403 && projectData.limitReached) {
+        throw new Error(projectData.error)
+      }
       if (!projectRes.ok) throw new Error(projectData.error ?? 'Failed to create project')
 
       router.push(`/projects/${projectData.id}`)

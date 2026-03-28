@@ -1,6 +1,8 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
 import { extractS3Key, getPresignedUrl } from '@/lib/s3'
+
+const USAGE_LIMIT = 20
 
 // Fields that store S3 object keys (or old pre-signed URLs that need normalising)
 const S3_URL_FIELDS = [
@@ -47,6 +49,25 @@ export async function GET() {
 export async function POST(req: Request) {
   const { userId } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Check admin status and enforce usage limit for non-admins
+  const clerk = await clerkClient()
+  const clerkUser = await clerk.users.getUser(userId)
+  const isAdmin = clerkUser.publicMetadata?.admin === true
+
+  if (!isAdmin) {
+    const { count } = await supabase
+      .from('projects')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+
+    if ((count ?? 0) >= USAGE_LIMIT) {
+      return Response.json(
+        { error: `You've reached the ${USAGE_LIMIT} video limit.`, limitReached: true },
+        { status: 403 },
+      )
+    }
+  }
 
   const body = await req.json()
   const { url, script, product_media_url, product_media_type } = body
