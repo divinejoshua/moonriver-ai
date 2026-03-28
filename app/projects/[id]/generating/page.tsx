@@ -49,6 +49,12 @@ export default function GeneratingPage({
     })
   }
 
+  async function fetchPresignedFinalUrl(): Promise<string | null> {
+    const res = await fetch(`/api/projects/${id}`)
+    const data = await res.json()
+    return data.final_video_url ?? null
+  }
+
   useEffect(() => {
     if (hasStarted.current) return
     hasStarted.current = true
@@ -164,14 +170,14 @@ export default function GeneratingPage({
         setStageStatus('bgm', 'active')
         await devDelay()
         setStageStatus('bgm', 'done')
-        setFinalVideoUrl(devBgmUrl)
         await saveProject({ final_video_url: devBgmUrl, status: 'done' })
+        setFinalVideoUrl(await fetchPresignedFinalUrl())
         return
       }
       if (!music_url) {
         setStageStatus('bgm', 'done')
-        setFinalVideoUrl(devCaptionedUrl)
         await saveProject({ final_video_url: devCaptionedUrl, status: 'done' })
+        setFinalVideoUrl(await fetchPresignedFinalUrl())
         return
       }
       setStageStatus('bgm', 'active')
@@ -186,8 +192,8 @@ export default function GeneratingPage({
           throw new Error(data.error ?? 'Failed to add background music')
         }
         const data = await res.json()
-        setFinalVideoUrl(data.finalVideoUrl)
         await saveProject({ final_video_url: data.finalVideoUrl, status: 'done' })
+        setFinalVideoUrl(await fetchPresignedFinalUrl())
         setStageStatus('bgm', 'done')
       } catch (err) {
         setStageStatus('bgm', 'error')
@@ -250,14 +256,14 @@ export default function GeneratingPage({
       setStageStatus('bgm', 'active')
       await devDelay()
       setStageStatus('bgm', 'done')
-      setFinalVideoUrl(devBgmUrl)
       await saveProject({ final_video_url: devBgmUrl, status: 'done' })
+      setFinalVideoUrl(await fetchPresignedFinalUrl())
       return
     }
     if (!music_url) {
       setStageStatus('bgm', 'done')
-      setFinalVideoUrl(captionedUrl)
       await saveProject({ final_video_url: captionedUrl, status: 'done' })
+      setFinalVideoUrl(await fetchPresignedFinalUrl())
       return
     }
     setStageStatus('bgm', 'active')
@@ -272,8 +278,8 @@ export default function GeneratingPage({
         throw new Error(data.error ?? 'Failed to add background music')
       }
       const data = await res.json()
-      setFinalVideoUrl(data.finalVideoUrl)
       await saveProject({ final_video_url: data.finalVideoUrl, status: 'done' })
+      setFinalVideoUrl(await fetchPresignedFinalUrl())
       setStageStatus('bgm', 'done')
     } catch (err) {
       setStageStatus('bgm', 'error')
