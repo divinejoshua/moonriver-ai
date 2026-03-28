@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, SignInButton, UserButton } from '@clerk/nextjs'
 import Header from './components/Header'
@@ -14,6 +14,15 @@ export default function Home() {
   const [url, setUrl] = useState('')
   const [urlError, setUrlError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [usage, setUsage] = useState<{ used: number; limit: number; isAdmin: boolean } | null>(null)
+
+  useEffect(() => {
+    if (!isSignedIn) return
+    fetch('/api/usage')
+      .then((r) => r.json())
+      .then((data) => { if (!data.error) setUsage(data) })
+      .catch(() => {})
+  }, [isSignedIn])
 
   const URL_REGEX = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/
 
@@ -84,6 +93,7 @@ export default function Home() {
       }
       if (!projectRes.ok) throw new Error(projectData.error ?? 'Failed to create project')
 
+      setUsage((prev) => prev && !prev.isAdmin ? { ...prev, used: prev.used + 1 } : prev)
       router.push(`/projects/${projectData.id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -154,9 +164,25 @@ export default function Home() {
             {(urlError || error) && (
               <p className="text-xs text-destructive text-center">{urlError ?? error}</p>
             )}
-            <p className="text-xs text-muted-foreground">
-              Works with Shopify, Amazon, landing pages, and more
-            </p>
+
+            <div className="flex flex-col items-center gap-1.5">
+              <p className="text-xs text-muted-foreground">
+                Works with Shopify, Amazon, landing pages, and more
+              </p>
+              {usage && !usage.isAdmin && (
+                <div className="flex items-center gap-2">
+                  <div className="w-24 h-1 rounded-full bg-border overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: `${Math.min((usage.used / usage.limit) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {Math.max(usage.limit - usage.used, 0)} of {usage.limit} videos remaining
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
