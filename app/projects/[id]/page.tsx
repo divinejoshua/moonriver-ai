@@ -43,10 +43,10 @@ export default function ProjectPage({
         setScript(data.script ?? '')
         setSelectedAvatar(data.selected_avatar ?? 0)
         if (data.music_url) setSelectedMusic(data.music_url)
-        if (data.product_media_url && data.product_media_type) {
+        if (data.product_media_url) {
           setProductMedia({
             s3Url: data.product_media_url,
-            type: data.product_media_type,
+            type: data.product_media_type ?? 'image',
             previewSrc: data.product_media_url,
           })
         }

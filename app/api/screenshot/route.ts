@@ -45,10 +45,11 @@ export async function POST(req: Request) {
       filename,
       'image/jpeg',
     )
-    const url = getS3Url(key)
+    const mediaUrl = getS3Url(key)
 
-    return Response.json({ url })
-  } catch {
+    return Response.json({ url: mediaUrl })
+  } catch (err) {
+    console.error('[screenshot] failed:', err)
     return Response.json({ error: 'Screenshot failed' }, { status: 500 })
   } finally {
     await browser.close()
