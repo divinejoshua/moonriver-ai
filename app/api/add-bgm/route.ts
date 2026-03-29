@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
-import { uploadToS3, getS3Url } from '@/lib/s3'
+import { uploadToS3, getS3Url, toFetchableUrl } from '@/lib/s3'
 import { addBgm } from '@/lib/add-bgm'
 
 export const maxDuration = 120
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   const outputPath = path.join(tmpDir, 'output.mp4')
 
   try {
-    const [videoRes, musicRes] = await Promise.all([fetch(videoUrl), fetch(musicUrl)])
+    const [videoRes, musicRes] = await Promise.all([fetch(await toFetchableUrl(videoUrl)), fetch(await toFetchableUrl(musicUrl))])
     if (!videoRes.ok) throw new Error(`Failed to download video: ${videoRes.status}`)
     if (!musicRes.ok) throw new Error(`Failed to download music: ${musicRes.status}`)
 

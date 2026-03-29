@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
-import { uploadToS3, getS3Url } from '@/lib/s3'
+import { uploadToS3, getS3Url, toFetchableUrl } from '@/lib/s3'
 import { mergeVideo } from '@/lib/merge-video'
 
 export const maxDuration = 120
@@ -44,11 +44,11 @@ export async function POST(req: Request) {
   const outputPath = path.join(tmpDir, 'merged.mp4')
 
   try {
-    await downloadTo(lipsyncVideoUrl, lipsyncPath)
+    await downloadTo(await toFetchableUrl(lipsyncVideoUrl), lipsyncPath)
 
     // Download product media — derive extension from content-type
     const tempProductPath = path.join(tmpDir, 'product_tmp')
-    const contentType = await downloadTo(productMediaUrl, tempProductPath)
+    const contentType = await downloadTo(await toFetchableUrl(productMediaUrl), tempProductPath)
     const ext = MIME_TO_EXT[contentType] ?? (productMediaType === 'video' ? 'mp4' : 'png')
     const productPath = `${tempProductPath}.${ext}`
     const { rename } = await import('fs/promises')

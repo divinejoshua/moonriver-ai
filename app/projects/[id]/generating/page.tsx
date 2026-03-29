@@ -83,174 +83,158 @@ export default function GeneratingPage({
   async function run(p: Project) {
     const { script, selected_avatar, product_media_url, product_media_type, music_url } = p
 
-    // Stage: audio
-    setStageStatus('audio', 'active')
-    let audioDataUri: string | null = null
-    try {
-      const devAudioUrl = process.env.NEXT_PUBLIC_DEV_AUDIO_URL
-      if (devAudioUrl) {
-        const res = await fetch(devAudioUrl)
-        if (!res.ok) throw new Error('Failed to fetch dev audio')
-        const blob = await res.blob()
-        const arrayBuffer = await blob.arrayBuffer()
-        const uint8 = new Uint8Array(arrayBuffer)
-        let binary = ''
-        uint8.forEach((b) => { binary += String.fromCharCode(b) })
-        audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
-        await devDelay()
-      } else {
-        const voiceId = AVATAR_VOICE_MAP[selected_avatar]
-        const res = await fetch('/api/generate-audio', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ script, voiceId }),
-        })
-        if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error ?? 'Failed to generate audio')
-        }
-        const blob = await res.blob()
-        const arrayBuffer = await blob.arrayBuffer()
-        const uint8 = new Uint8Array(arrayBuffer)
-        let binary = ''
-        uint8.forEach((b) => { binary += String.fromCharCode(b) })
-        audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
-      }
+    // ── Stage: audio + lipsync ──
+    // If lipsync is already done, skip both audio and lipsync entirely.
+    let lipsyncVideoUrl: string | null = p.lipsync_video_url ?? null
+    if (lipsyncVideoUrl) {
       setStageStatus('audio', 'done')
-    } catch (err) {
-      setStageStatus('audio', 'error')
-      setError(err instanceof Error ? err.message : 'Audio generation failed')
-      await saveProject({ status: 'error' })
-      return
-    }
-
-    // Stage: lipsync
-    setStageStatus('lipsync', 'active')
-    let lipsyncVideoUrl: string | null = null
-    try {
-      const devLipsyncUrl = process.env.NEXT_PUBLIC_DEV_LIPSYNC_URL
-      if (devLipsyncUrl) {
-        lipsyncVideoUrl = devLipsyncUrl
-        await devDelay()
-      } else {
-        const res = await fetch('/api/generate-lipsync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ audioBase64: audioDataUri, avatarId: selected_avatar }),
-        })
-        if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error ?? 'Failed to generate lipsync')
-        }
-        const data = await res.json()
-        lipsyncVideoUrl = data.videoUrl
-      }
-      await saveProject({ lipsync_video_url: lipsyncVideoUrl })
       setStageStatus('lipsync', 'done')
-    } catch (err) {
-      setStageStatus('lipsync', 'error')
-      setError(err instanceof Error ? err.message : 'Lipsync generation failed')
-      await saveProject({ status: 'error' })
-      return
-    }
-
-    // Stage: merge
-    const devCaptionedUrl = process.env.NEXT_PUBLIC_DEV_CAPTIONED_URL
-    if (devCaptionedUrl) {
-      setStageStatus('merge', 'active')
-      await devDelay()
-      setStageStatus('merge', 'done')
-      setStageStatus('caption', 'active')
-      await devDelay()
-      setStageStatus('caption', 'done')
-      await saveProject({ captioned_video_url: devCaptionedUrl })
-
-      const devBgmUrl = process.env.NEXT_PUBLIC_DEV_BGM_URL
-      if (devBgmUrl) {
-        setStageStatus('bgm', 'active')
-        await devDelay()
-        setStageStatus('bgm', 'done')
-        await saveProject({ final_video_url: devBgmUrl, status: 'done' })
-        setFinalVideoUrl(await fetchPresignedFinalUrl())
-        return
-      }
-      if (!music_url) {
-        setStageStatus('bgm', 'done')
-        await saveProject({ final_video_url: devCaptionedUrl, status: 'done' })
-        setFinalVideoUrl(await fetchPresignedFinalUrl())
-        return
-      }
-      setStageStatus('bgm', 'active')
+    } else {
+      // Generate audio
+      setStageStatus('audio', 'active')
+      let audioDataUri: string | null = null
       try {
-        const res = await fetch('/api/add-bgm', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ videoUrl: devCaptionedUrl, musicUrl: music_url }),
-        })
-        if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error ?? 'Failed to add background music')
+        const devAudioUrl = process.env.NEXT_PUBLIC_DEV_AUDIO_URL
+        if (devAudioUrl) {
+          const res = await fetch(devAudioUrl)
+          if (!res.ok) throw new Error('Failed to fetch dev audio')
+          const blob = await res.blob()
+          const arrayBuffer = await blob.arrayBuffer()
+          const uint8 = new Uint8Array(arrayBuffer)
+          let binary = ''
+          uint8.forEach((b) => { binary += String.fromCharCode(b) })
+          audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
+          await devDelay()
+        } else {
+          const voiceId = AVATAR_VOICE_MAP[selected_avatar]
+          const res = await fetch('/api/generate-audio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ script, voiceId }),
+          })
+          if (!res.ok) {
+            const data = await res.json()
+            throw new Error(data.error ?? 'Failed to generate audio')
+          }
+          const blob = await res.blob()
+          const arrayBuffer = await blob.arrayBuffer()
+          const uint8 = new Uint8Array(arrayBuffer)
+          let binary = ''
+          uint8.forEach((b) => { binary += String.fromCharCode(b) })
+          audioDataUri = `data:audio/mpeg;base64,${btoa(binary)}`
         }
-        const data = await res.json()
-        await saveProject({ final_video_url: data.finalVideoUrl, status: 'done' })
-        setFinalVideoUrl(await fetchPresignedFinalUrl())
-        setStageStatus('bgm', 'done')
+        setStageStatus('audio', 'done')
       } catch (err) {
-        setStageStatus('bgm', 'error')
-        setError(err instanceof Error ? err.message : 'Background music failed')
+        setStageStatus('audio', 'error')
+        setError(err instanceof Error ? err.message : 'Audio generation failed')
         await saveProject({ status: 'error' })
+        return
       }
-      return
+
+      // Generate lipsync
+      setStageStatus('lipsync', 'active')
+      try {
+        const devLipsyncUrl = process.env.NEXT_PUBLIC_DEV_LIPSYNC_URL
+        if (devLipsyncUrl) {
+          lipsyncVideoUrl = devLipsyncUrl
+          await devDelay()
+        } else {
+          const res = await fetch('/api/generate-lipsync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audioBase64: audioDataUri, avatarId: selected_avatar }),
+          })
+          if (!res.ok) {
+            const data = await res.json()
+            throw new Error(data.error ?? 'Failed to generate lipsync')
+          }
+          const data = await res.json()
+          lipsyncVideoUrl = data.videoUrl
+        }
+        await saveProject({ lipsync_video_url: lipsyncVideoUrl })
+        setStageStatus('lipsync', 'done')
+      } catch (err) {
+        setStageStatus('lipsync', 'error')
+        setError(err instanceof Error ? err.message : 'Lipsync generation failed')
+        await saveProject({ status: 'error' })
+        return
+      }
     }
 
-    setStageStatus('merge', 'active')
-    let mergedUrl: string | null = null
-    try {
-      const res = await fetch('/api/merge-video', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lipsyncVideoUrl, productMediaUrl: product_media_url, productMediaType: product_media_type }),
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error ?? 'Failed to merge video')
-      }
-      const data = await res.json()
-      mergedUrl = data.mergedVideoUrl
-      await saveProject({ merged_video_url: mergedUrl })
+    // ── Stage: merge ──
+    let mergedUrl: string | null = p.merged_video_url ?? null
+    if (mergedUrl) {
       setStageStatus('merge', 'done')
-    } catch (err) {
-      setStageStatus('merge', 'error')
-      setError(err instanceof Error ? err.message : 'Video merge failed')
-      await saveProject({ status: 'error' })
-      return
-    }
-
-    // Stage: caption
-    setStageStatus('caption', 'active')
-    let captionedUrl: string | null = null
-    try {
-      const res = await fetch('/api/caption-video', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: mergedUrl }),
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error ?? 'Failed to add captions')
+    } else {
+      const devCaptionedUrl = process.env.NEXT_PUBLIC_DEV_CAPTIONED_URL
+      if (devCaptionedUrl) {
+        setStageStatus('merge', 'active')
+        await devDelay()
+        setStageStatus('merge', 'done')
+        mergedUrl = devCaptionedUrl
+      } else {
+        setStageStatus('merge', 'active')
+        try {
+          const res = await fetch('/api/merge-video', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lipsyncVideoUrl, productMediaUrl: product_media_url, productMediaType: product_media_type }),
+          })
+          if (!res.ok) {
+            const data = await res.json()
+            throw new Error(data.error ?? 'Failed to merge video')
+          }
+          const data = await res.json()
+          mergedUrl = data.mergedVideoUrl
+          await saveProject({ merged_video_url: mergedUrl })
+          setStageStatus('merge', 'done')
+        } catch (err) {
+          setStageStatus('merge', 'error')
+          setError(err instanceof Error ? err.message : 'Video merge failed')
+          await saveProject({ status: 'error' })
+          return
+        }
       }
-      const data = await res.json()
-      captionedUrl = data.captionedVideoUrl
-      await saveProject({ captioned_video_url: captionedUrl })
-      setStageStatus('caption', 'done')
-    } catch (err) {
-      setStageStatus('caption', 'error')
-      setError(err instanceof Error ? err.message : 'Caption generation failed')
-      await saveProject({ status: 'error' })
-      return
     }
 
-    // Stage: bgm
+    // ── Stage: caption ──
+    let captionedUrl: string | null = p.captioned_video_url ?? null
+    if (captionedUrl) {
+      setStageStatus('caption', 'done')
+    } else {
+      const devCaptionedUrl = process.env.NEXT_PUBLIC_DEV_CAPTIONED_URL
+      if (devCaptionedUrl) {
+        setStageStatus('caption', 'active')
+        await devDelay()
+        captionedUrl = devCaptionedUrl
+        await saveProject({ captioned_video_url: captionedUrl })
+        setStageStatus('caption', 'done')
+      } else {
+        setStageStatus('caption', 'active')
+        try {
+          const res = await fetch('/api/caption-video', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videoUrl: mergedUrl }),
+          })
+          if (!res.ok) {
+            const data = await res.json()
+            throw new Error(data.error ?? 'Failed to add captions')
+          }
+          const data = await res.json()
+          captionedUrl = data.captionedVideoUrl
+          await saveProject({ captioned_video_url: captionedUrl })
+          setStageStatus('caption', 'done')
+        } catch (err) {
+          setStageStatus('caption', 'error')
+          setError(err instanceof Error ? err.message : 'Caption generation failed')
+          await saveProject({ status: 'error' })
+          return
+        }
+      }
+    }
+
+    // ── Stage: bgm ──
     const devBgmUrl = process.env.NEXT_PUBLIC_DEV_BGM_URL
     if (devBgmUrl) {
       setStageStatus('bgm', 'active')

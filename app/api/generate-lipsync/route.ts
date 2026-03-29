@@ -2,16 +2,11 @@ import { fal } from '@fal-ai/client'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { uploadToS3, getPresignedUrl, getS3Url } from '@/lib/s3'
+import { AVATARS } from '@/lib/constants'
 
 export const maxDuration = 120
 
 fal.config({ credentials: process.env.FAL_API_KEY })
-
-const AVATAR_IMAGE_FILES: Record<number, string> = {
-  0: 'one.png',
-  1: 'two.png',
-  2: 'three.png',
-}
 
 export async function POST(request: Request) {
   const { audioBase64, avatarId } = await request.json()
@@ -20,15 +15,17 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Missing audioBase64 or avatarId' }, { status: 400 })
   }
 
-  const imageFile = AVATAR_IMAGE_FILES[avatarId as number]
-  if (!imageFile) {
+  const avatar = AVATARS.find((a) => a.id === avatarId)
+  if (!avatar) {
     return Response.json({ error: 'Invalid avatarId' }, { status: 400 })
   }
+  const imageFile = avatar.src.split('/').pop()!
 
   // Upload avatar image to S3 images/
   const imagePath = join(process.cwd(), 'public', 'avatars', imageFile)
   const imageBuffer = readFileSync(imagePath)
-  const imageKey = await uploadToS3(imageBuffer, 'images', imageFile, 'image/png')
+  const imageMime = imageFile.endsWith('.jpeg') || imageFile.endsWith('.jpg') ? 'image/jpeg' : 'image/png'
+  const imageKey = await uploadToS3(imageBuffer, 'images', imageFile, imageMime)
   const imageUrl = await getPresignedUrl(imageKey, 3600)
 
   // Decode audio base64 data URI and upload to S3 audio/

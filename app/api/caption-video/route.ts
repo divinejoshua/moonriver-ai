@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
-import { uploadToS3, getS3Url } from '@/lib/s3'
+import { uploadToS3, getS3Url, toFetchableUrl } from '@/lib/s3'
 import { captionVideo } from '@/lib/caption-video'
 
 export const maxDuration = 300
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   const outputPath = path.join(tmpDir, 'captioned.mp4')
 
   try {
-    const res = await fetch(videoUrl)
+    const res = await fetch(await toFetchableUrl(videoUrl))
     if (!res.ok) throw new Error(`Failed to download video: ${res.status}`)
     await writeFile(inputPath, Buffer.from(await res.arrayBuffer()))
 

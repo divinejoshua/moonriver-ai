@@ -37,6 +37,18 @@ export function extractS3Key(urlOrKey: string): string {
 }
 
 /**
+ * Returns a fetchable URL for any asset URL or key.
+ * - Plain S3 key (no https://) → presigned URL
+ * - URL belonging to this bucket → presigned URL
+ * - Any other URL (external CDN, music, etc.) → unchanged
+ */
+export async function toFetchableUrl(urlOrKey: string): Promise<string> {
+  if (!urlOrKey.startsWith('https://')) return getPresignedUrl(urlOrKey)
+  if (urlOrKey.includes(`${BUCKET}.s3.`)) return getPresignedUrl(extractS3Key(urlOrKey))
+  return urlOrKey
+}
+
+/**
  * Returns a fresh pre-signed GET URL for a stored S3 key.
  * Default TTL: 1 day (86 400 s).
  */
