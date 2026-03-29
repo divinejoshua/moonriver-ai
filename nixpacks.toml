@@ -14,3 +14,6 @@ nixPkgs = [
   "mesa",
   "alsa-lib",
 ]
+
+[phases.install]
+cmds = ["npm install --omit=dev --ignore-scripts=false"]
