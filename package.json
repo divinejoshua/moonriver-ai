@@ -15,8 +15,6 @@
     "@fal-ai/client": "^1.9.4",
     "@google/genai": "^1.46.0",
     "@napi-rs/canvas": "^0.1.97",
-    "@napi-rs/canvas-darwin-arm64": "^0.1.97",
-    "@napi-rs/canvas-linux-x64-gnu": "^0.1.97",
     "@supabase/supabase-js": "^2.100.1",
     "@xenova/transformers": "^2.17.2",
     "ffmpeg-static": "^5.3.0",
@@ -26,6 +24,10 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "stripe": "^21.0.1"
+  },
+  "optionalDependencies": {
+    "@napi-rs/canvas-darwin-arm64": "^0.1.97",
+    "@napi-rs/canvas-linux-x64-gnu": "^0.1.97"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
