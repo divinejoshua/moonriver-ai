@@ -10,8 +10,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Moonriver — AI Video Generator",
-  description: "Generate product review videos in seconds from a product link.",
+  title: "Moonriver — Create Viral UGC Videos from Any Product URL",
+  description:
+    "Turn any product link into a TikTok-ready UGC review video in minutes. AI script, avatar voiceover, auto-captions, and background music. 100K+ views generated.",
+  openGraph: {
+    title: "Moonriver — Create Viral UGC Videos from Any Product URL",
+    description:
+      "Turn any product link into a TikTok-ready UGC review video in minutes. 100K+ views generated.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
