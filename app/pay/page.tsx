@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function PayPage() {
+function PayPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { isSignedIn, isLoaded } = useAuth()
@@ -135,5 +135,13 @@ export default function PayPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function PayPage() {
+  return (
+    <Suspense>
+      <PayPageInner />
+    </Suspense>
   )
 }
