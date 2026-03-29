@@ -445,8 +445,8 @@ export default function Home() {
 
           {/* ── FOOTER ── */}
           <footer className="border-t border-border px-6 py-6 flex items-center justify-between text-xs text-muted-foreground">
-            <span>© {new Date().getFullYear()} Moonriver</span>
-            <span>AI UGC Video Generator</span>
+            <span>© {new Date().getFullYear()} Moonriver. All rights reserved.</span>
+            <a href="mailto:hello@moonriverai.com" className="hover:text-foreground transition-colors">hello@moonriverai.com</a>
           </footer>
         </>
       )}
