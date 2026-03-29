@@ -304,6 +304,32 @@ export default function Home() {
             </div>
           </section>
 
+          {/* ── VIDEO SHOWCASE ── */}
+          <section className="border-t border-border px-4 py-20">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-2xl font-bold text-foreground">Videos made with Moonriver</h2>
+                <p className="text-muted-foreground text-sm mt-2">Real UGC videos generated on this platform</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="relative bg-muted border border-border rounded-2xl overflow-hidden"
+                    style={{ aspectRatio: '9/16' }}
+                  >
+                    {/* Placeholder — replace with <video> or embed when links are ready */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7L8 5z" />
+                      </svg>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* ── HOW IT WORKS ── */}
           <section className="border-t border-border bg-muted/40 px-4 py-20">
             <div className="max-w-4xl mx-auto">
