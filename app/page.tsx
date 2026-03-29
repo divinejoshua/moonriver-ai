@@ -13,9 +13,9 @@ const PENDING_URL_KEY = 'moonriver_pending_url'
 const PROOF_VIDEOS = [
   'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/final_1774627824876.mp4',
   'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/final_1774794026240.mp4',
-  'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/main-voice-over_merged_captioned_with_music.mp4',
   'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/moonriver_ugc+(2).mp4',
   'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/ugc_reel_final.mp4',
+  'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/main-voice-over_merged_captioned_with_music.mp4',
   'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/video-3_merged_captioned_with_music.mp4',
 ]
 
@@ -331,10 +331,12 @@ export default function Home() {
                     <video
                       src={src}
                       className="absolute inset-0 w-full h-full object-cover"
+                      autoPlay
                       loop
                       muted
                       playsInline
-                      controls
+                      disablePictureInPicture
+                      controlsList="nodownload nofullscreen noremoteplayback"
                     />
                   </div>
                 ))}
