@@ -10,11 +10,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Moonriver — Create Viral UGC Videos from Any Product URL",
+  title: "Moonriver — Create Viral UGC Videos in minutes",
   description:
     "Turn any product link into a TikTok-ready UGC review video in minutes. AI script, avatar voiceover, auto-captions, and background music. 100K+ views generated.",
   openGraph: {
-    title: "Moonriver — Create Viral UGC Videos from Any Product URL",
+    title: "Moonriver — Create Viral UGC Videos in minutes",
     description:
       "Turn any product link into a TikTok-ready UGC review video in minutes. 100K+ views generated.",
     type: "website",
@@ -28,22 +28,22 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-    <html
-      lang="en"
-      className={`${inter.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
-      <Script src="https://www.googletagmanager.com/gtag/js?id=G-34BF8SH5HS" />
-      <Script id="google-analytics">
-        {`
+      <html
+        lang="en"
+        className={`${inter.variable} h-full antialiased`}
+      >
+        <body className="min-h-full flex flex-col">{children}</body>
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-34BF8SH5HS" />
+        <Script id="google-analytics">
+          {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
           gtag('config', 'G-34BF8SH5HS');
         `}
-      </Script>
-    </html>
+        </Script>
+      </html>
     </ClerkProvider>
   );
 }
