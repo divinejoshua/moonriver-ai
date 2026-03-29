@@ -10,6 +10,15 @@ type Step = 'input' | 'generating'
 
 const PENDING_URL_KEY = 'moonriver_pending_url'
 
+const PROOF_VIDEOS = [
+  'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/final_1774627824876.mp4',
+  'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/final_1774794026240.mp4',
+  'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/main-voice-over_merged_captioned_with_music.mp4',
+  'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/moonriver_ugc+(2).mp4',
+  'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/ugc_reel_final.mp4',
+  'https://didiai-test.s3.us-east-2.amazonaws.com/moonriver-assets/moonriver-public-ugc/video-3_merged_captioned_with_music.mp4',
+]
+
 const TESTIMONIALS = [
   {
     name: 'Jamie L.',
@@ -313,18 +322,20 @@ export default function Home() {
                 <p className="text-muted-foreground text-sm mt-2">Real UGC videos generated on this platform</p>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {Array.from({ length: 6 }).map((_, i) => (
+                {PROOF_VIDEOS.map((src) => (
                   <div
-                    key={i}
+                    key={src}
                     className="relative bg-muted border border-border rounded-2xl overflow-hidden"
                     style={{ aspectRatio: '9/16' }}
                   >
-                    {/* Placeholder — replace with <video> or embed when links are ready */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5v14l11-7L8 5z" />
-                      </svg>
-                    </div>
+                    <video
+                      src={src}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loop
+                      muted
+                      playsInline
+                      controls
+                    />
                   </div>
                 ))}
               </div>
