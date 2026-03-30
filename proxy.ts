@@ -1,7 +1,7 @@
 import { clerkMiddleware, clerkClient } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
-const PUBLIC_PATHS = ['/pay', '/api/stripe/webhook', '/api/stripe/checkout', '/api/stripe/verify']
+const PUBLIC_PATHS = ['/', '/pay', '/api/stripe/webhook', '/api/stripe/checkout', '/api/stripe/verify']
 
 export const proxy = clerkMiddleware(async (auth, request) => {
   const { userId } = await auth()

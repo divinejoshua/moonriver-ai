@@ -81,6 +81,7 @@ export default function Home() {
   const [usage, setUsage] = useState<{ used: number; limit: number; isAdmin: boolean; paid: boolean } | null>(null)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const didAutoGenerate = useRef(false)
+  const wasSignedIn = useRef<boolean | null>(null)
 
   // Restore URL typed before sign-in
   useEffect(() => {
@@ -88,18 +89,21 @@ export default function Home() {
     if (pending) setUrl(pending)
   }, [])
 
-  // Fetch usage once signed in; redirect to /pay if user hasn't paid
+  // Fetch usage once signed in; redirect to /pay only if user just logged in
   useEffect(() => {
+    if (!isLoaded) return
+    const justLoggedIn = wasSignedIn.current === false && isSignedIn === true
+    wasSignedIn.current = isSignedIn ?? false
     if (!isSignedIn) return
     fetch('/api/usage')
       .then((r) => r.json())
       .then((data) => {
         if (data.error) return
         setUsage(data)
-        if (!data.paid) router.replace('/pay')
+        if (justLoggedIn && !data.paid && !data.isAdmin) router.replace('/pay')
       })
       .catch(() => { })
-  }, [isSignedIn])
+  }, [isLoaded, isSignedIn])
 
   // Auto-generate after sign-in if the user had typed a URL and has paid
   useEffect(() => {
@@ -145,6 +149,10 @@ export default function Home() {
   async function handleGenerate(urlOverride?: string) {
     const raw = (urlOverride ?? url).trim()
     if (!validateUrl(raw)) return
+    if (usage && !usage.paid && !usage.isAdmin) {
+      router.push('/pay')
+      return
+    }
     setError(null)
     setStep('generating')
     const target = `https://${raw}`
