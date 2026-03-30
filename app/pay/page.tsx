@@ -35,7 +35,7 @@ function PayPageInner() {
         else setError('Payment could not be confirmed. Please contact support.')
       })
       .catch(() => setError('Something went wrong. Please contact support.'))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId, isSignedIn])
 
   async function handlePay() {
@@ -89,7 +89,7 @@ function PayPageInner() {
               Get started with Moonriver
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              One-time payment for lifetime access to generate up to 20 AI-powered UGC videos.
+              One-time payment to generate up to 20 AI UGC videos.
             </p>
           </div>
 
@@ -98,6 +98,7 @@ function PayPageInner() {
             {[
               '20 AI-generated UGC videos',
               'Avatar lip-sync voiceovers',
+              '100+ intro and outro hooks',
               'Auto-captions & background music',
               'Download in full quality',
             ].map((feature) => (
