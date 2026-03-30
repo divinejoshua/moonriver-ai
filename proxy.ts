@@ -18,7 +18,7 @@ export const proxy = clerkMiddleware(async (auth, request) => {
   const isAdmin = user.publicMetadata?.admin === true
 
   if (!isPaid && !isAdmin) {
-    return NextResponse.redirect(new URL('/api/stripe/checkout', request.url))
+    return NextResponse.redirect(new URL('/pay', request.url))
   }
 
   return NextResponse.next()

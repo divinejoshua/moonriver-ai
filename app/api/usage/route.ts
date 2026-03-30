@@ -10,9 +10,10 @@ export async function GET() {
   const clerk = await clerkClient()
   const clerkUser = await clerk.users.getUser(userId)
   const isAdmin = clerkUser.publicMetadata?.admin === true
+  const isPaid = clerkUser.publicMetadata?.paid === true
 
   if (isAdmin) {
-    return Response.json({ isAdmin: true, used: 0, limit: USAGE_LIMIT })
+    return Response.json({ isAdmin: true, paid: true, used: 0, limit: USAGE_LIMIT })
   }
 
   const { count } = await supabase
@@ -21,5 +22,5 @@ export async function GET() {
     .eq('user_id', userId)
 
   const used = count ?? 0
-  return Response.json({ isAdmin: false, used, limit: USAGE_LIMIT })
+  return Response.json({ isAdmin: false, paid: isPaid, used, limit: USAGE_LIMIT })
 }

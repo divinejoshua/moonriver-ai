@@ -85,7 +85,7 @@ export default function Home() {
   const [url, setUrl] = useState('')
   const [urlError, setUrlError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [usage, setUsage] = useState<{ used: number; limit: number; isAdmin: boolean } | null>(null)
+  const [usage, setUsage] = useState<{ used: number; limit: number; isAdmin: boolean; paid: boolean } | null>(null)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const didAutoGenerate = useRef(false)
 
@@ -95,18 +95,22 @@ export default function Home() {
     if (pending) setUrl(pending)
   }, [])
 
-  // Fetch usage once signed in
+  // Fetch usage once signed in; redirect to /pay if user hasn't paid
   useEffect(() => {
     if (!isSignedIn) return
     fetch('/api/usage')
       .then((r) => r.json())
-      .then((data) => { if (!data.error) setUsage(data) })
+      .then((data) => {
+        if (data.error) return
+        setUsage(data)
+        if (!data.paid) router.replace('/pay')
+      })
       .catch(() => { })
   }, [isSignedIn])
 
-  // Auto-generate after sign-in if the user had typed a URL
+  // Auto-generate after sign-in if the user had typed a URL and has paid
   useEffect(() => {
-    if (!isLoaded || !isSignedIn || didAutoGenerate.current) return
+    if (!isLoaded || !isSignedIn || !usage || !usage.paid || didAutoGenerate.current) return
     const pending = sessionStorage.getItem(PENDING_URL_KEY)
     if (!pending) return
     didAutoGenerate.current = true
@@ -114,7 +118,7 @@ export default function Home() {
     setUrl(pending)
     handleGenerate(pending)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, isSignedIn])
+  }, [isLoaded, isSignedIn, usage])
 
   const URL_REGEX = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/
 
