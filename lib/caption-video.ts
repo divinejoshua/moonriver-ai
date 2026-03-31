@@ -142,6 +142,7 @@ export async function captionVideo(opts: CaptionOptions): Promise<void> {
       '-map', '[vout]',
       '-map', '0:a?',
       '-c:v', 'libx264',
+      '-pix_fmt', 'yuv420p',
       '-preset', 'fast',
       '-crf', '18',
       '-c:a', 'aac',
