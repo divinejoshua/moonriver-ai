@@ -129,13 +129,15 @@ export async function captionVideo(opts: CaptionOptions): Promise<void> {
     let prev = '0:v'
     chunks.forEach((chunk, i) => {
       const inputIdx = i + 1
+      const pLabel = `p${i}`
       const outLabel = i < chunks.length - 1 ? `v${i + 1}` : 'vraw'
+      filterParts.push(`[${inputIdx}:v]format=rgba[${pLabel}]`)
       filterParts.push(
-        `[${prev}][${inputIdx}:v]overlay=x=(W-w)/2:y=H-h-${marginV}:enable='between(t,${chunk.start.toFixed(3)},${chunk.end.toFixed(3)})'[${outLabel}]`,
+        `[${prev}][${pLabel}]overlay=x=(W-w)/2:y=H-h-${marginV}:enable='between(t,${chunk.start.toFixed(3)},${chunk.end.toFixed(3)})'[${outLabel}]`,
       )
       prev = outLabel
     })
-    filterParts.push('[vraw]setsar=1[vout]')
+    filterParts.push('[vraw]format=yuv420p,setsar=1[vout]')
 
     ffArgs.push(
       '-filter_complex', filterParts.join(';'),
