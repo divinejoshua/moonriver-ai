@@ -2,7 +2,6 @@ import { execFile } from 'child_process'
 import { promisify } from 'util'
 import { writeFile, unlink, readFile } from 'fs/promises'
 import path from 'path'
-import { createCanvas } from '@napi-rs/canvas'
 const execFileAsync = promisify(execFile)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const FFMPEG: string = require('ffmpeg-static')
@@ -64,33 +63,46 @@ async function transcribeToChunks(videoPath: string, maxWords: number): Promise<
   return chunks
 }
 
-async function renderCaptionPng(
-  text: string,
-  videoWidth: number,
-  videoHeight: number,
+function toAssTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  const cs = Math.round((seconds % 1) * 100)
+  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`
+}
+
+function generateAss(
+  chunks: Chunk[],
+  width: number,
+  height: number,
   fontSize: number,
   marginV: number,
-): Promise<Buffer> {
-  const canvas = createCanvas(videoWidth, videoHeight)
-  const ctx = canvas.getContext('2d')
+): string {
+  const outlineSize = Math.round(fontSize * 0.08)
+  const lines = [
+    '[Script Info]',
+    'ScriptType: v4.00+',
+    'WrapStyle: 0',
+    `PlayResX: ${width}`,
+    `PlayResY: ${height}`,
+    '',
+    '[V4+ Styles]',
+    'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
+    `Style: Default,Arial,${fontSize},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,${outlineSize},0,2,10,10,${marginV},1`,
+    '',
+    '[Events]',
+    'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text',
+  ]
 
-  ctx.clearRect(0, 0, videoWidth, videoHeight)
-  ctx.font = `bold ${fontSize}px sans-serif`
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'bottom'
+  for (const chunk of chunks) {
+    const text = chunk.text
+      .replace(/\\/g, '\\\\')
+      .replace(/\{/g, '\\{')
+      .replace(/\}/g, '\\}')
+    lines.push(`Dialogue: 0,${toAssTime(chunk.start)},${toAssTime(chunk.end)},Default,,0,0,0,,${text}`)
+  }
 
-  const x = videoWidth / 2
-  const y = videoHeight - marginV
-
-  ctx.strokeStyle = 'black'
-  ctx.lineWidth = fontSize * 0.08
-  ctx.lineJoin = 'round'
-  ctx.strokeText(text, x, y)
-
-  ctx.fillStyle = 'white'
-  ctx.fillText(text, x, y)
-
-  return canvas.encode('png')
+  return lines.join('\n')
 }
 
 export interface CaptionOptions {
@@ -113,36 +125,13 @@ export async function captionVideo(opts: CaptionOptions): Promise<void> {
     return
   }
 
-  const pngPaths: string[] = []
+  const assPath = path.join(tmpDir, 'captions.ass')
   try {
-    for (let i = 0; i < chunks.length; i++) {
-      const pngPath = path.join(tmpDir, `cap_${i}.png`)
-      const pngBuffer = await renderCaptionPng(chunks[i].text, width, height, fontSize, marginV)
-      await writeFile(pngPath, pngBuffer)
-      pngPaths.push(pngPath)
-    }
+    await writeFile(assPath, generateAss(chunks, width, height, fontSize, marginV))
 
-    const ffArgs: string[] = ['-y', '-i', input]
-    pngPaths.forEach((p) => ffArgs.push('-i', p))
-
-    const filterParts: string[] = []
-    let prev = '0:v'
-    chunks.forEach((chunk, i) => {
-      const inputIdx = i + 1
-      const pLabel = `p${i}`
-      const outLabel = i < chunks.length - 1 ? `v${i + 1}` : 'vraw'
-      filterParts.push(`[${inputIdx}:v]format=rgba[${pLabel}]`)
-      filterParts.push(
-        `[${prev}][${pLabel}]overlay=x=(W-w)/2:y=H-h-${marginV}:enable='between(t,${chunk.start.toFixed(3)},${chunk.end.toFixed(3)})'[${outLabel}]`,
-      )
-      prev = outLabel
-    })
-    filterParts.push('[vraw]format=yuv420p,setsar=1[vout]')
-
-    ffArgs.push(
-      '-filter_complex', filterParts.join(';'),
-      '-map', '[vout]',
-      '-map', '0:a?',
+    await execFileAsync(FFMPEG, [
+      '-y', '-i', input,
+      '-vf', `ass=${assPath}`,
       '-c:v', 'libx264',
       '-pix_fmt', 'yuv420p',
       '-preset', 'fast',
@@ -150,10 +139,8 @@ export async function captionVideo(opts: CaptionOptions): Promise<void> {
       '-c:a', 'aac',
       '-b:a', '192k',
       output,
-    )
-
-    await execFileAsync(FFMPEG, ffArgs)
+    ])
   } finally {
-    await Promise.allSettled(pngPaths.map((p) => unlink(p).catch(() => {})))
+    await unlink(assPath).catch(() => {})
   }
 }
