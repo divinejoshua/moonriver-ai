@@ -226,10 +226,10 @@ export default function Home() {
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 bg-accent border border-primary/30 text-accent-foreground text-xs font-medium px-3 py-1 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                  AI-powered UGC video generator
+                  AI-powered UGC Ad generator
                 </div>
                 <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground leading-tight">
-                  Create Viral UGC Videos <br className="hidden sm:block" /> in minutes
+                  Create Viral UGC Ads <br className="hidden sm:block" /> in minutes
                 </h1>
                 <p className="text-muted-foreground text-base leading-relaxed max-w-md mx-auto">
                   Paste your product link. Get a review script, AI avatar voiceover, captions, and a ready-to-post video — in under 5 minutes.
