@@ -89,14 +89,14 @@ function PayPageInner() {
               Get started with Moonriver
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              One-time payment to generate up to 20 AI UGC videos.
+              One-time payment to generate up to 10 AI UGC videos.
             </p>
           </div>
 
           {/* Feature list */}
           <div className="bg-card border border-border rounded-2xl p-5 text-left space-y-3">
             {[
-              '20 AI-generated UGC videos',
+              '10 AI-generated UGC videos',
               'Avatar lip-sync voiceovers',
               '100+ intro and outro hooks',
               'Auto-captions & background music',
@@ -119,7 +119,7 @@ function PayPageInner() {
               disabled={loading}
               className="w-full bg-primary hover:bg-primary/90 active:bg-primary/80 disabled:opacity-60 text-primary-foreground font-semibold py-3.5 rounded-xl transition-colors text-sm"
             >
-              {loading ? 'Redirecting…' : 'Pay $200 — Get started'}
+              {loading ? 'Redirecting…' : 'Pay $79 — Get started'}
             </button>
 
             {canceled && (

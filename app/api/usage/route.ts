@@ -1,7 +1,7 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
 
-const USAGE_LIMIT = 20
+const USAGE_LIMIT = 10
 
 export async function GET() {
   const { userId } = await auth()
@@ -10,7 +10,8 @@ export async function GET() {
   const clerk = await clerkClient()
   const clerkUser = await clerk.users.getUser(userId)
   const isAdmin = clerkUser.publicMetadata?.admin === true
-  const isPaid = clerkUser.publicMetadata?.paid === true
+  const paidCount = (clerkUser.publicMetadata?.paidCount as number) ?? 0
+  const isPaid = paidCount > 0
 
   if (isAdmin) {
     return Response.json({ isAdmin: true, paid: true, used: 0, limit: USAGE_LIMIT })
@@ -22,5 +23,6 @@ export async function GET() {
     .eq('user_id', userId)
 
   const used = count ?? 0
-  return Response.json({ isAdmin: false, paid: isPaid, used, limit: USAGE_LIMIT })
+  const limit = paidCount * USAGE_LIMIT
+  return Response.json({ isAdmin: false, paid: isPaid, used, limit })
 }

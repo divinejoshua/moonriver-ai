@@ -2,7 +2,7 @@ import { auth, clerkClient } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
 import { extractS3Key, getPresignedUrl } from '@/lib/s3'
 
-const USAGE_LIMIT = 20
+const USAGE_LIMIT = 10
 
 // Fields that store plain S3 URLs — freshened to presigned URLs before returning to clients
 const S3_URL_FIELDS = [
@@ -54,7 +54,8 @@ export async function POST(req: Request) {
   const clerk = await clerkClient()
   const clerkUser = await clerk.users.getUser(userId)
   const isAdmin = clerkUser.publicMetadata?.admin === true
-  const isPaid = clerkUser.publicMetadata?.paid === true
+  const paidCount = (clerkUser.publicMetadata?.paidCount as number) ?? 0
+  const isPaid = paidCount > 0
 
   if (!isPaid && !isAdmin) {
     return Response.json({ error: 'Payment required.', paymentRequired: true }, { status: 403 })
@@ -66,9 +67,10 @@ export async function POST(req: Request) {
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
 
-    if ((count ?? 0) >= USAGE_LIMIT) {
+    const effectiveLimit = paidCount * USAGE_LIMIT
+    if ((count ?? 0) >= effectiveLimit) {
       return Response.json(
-        { error: `You've reached the ${USAGE_LIMIT} video limit.`, limitReached: true },
+        { error: `You've reached your ${effectiveLimit} video limit.`, limitReached: true },
         { status: 403 },
       )
     }

@@ -18,8 +18,9 @@ export async function POST(req: Request) {
 
   const clerk = await clerkClient()
   const user = await clerk.users.getUser(userId)
+  const currentCount = (user.publicMetadata?.paidCount as number) ?? 0
   await clerk.users.updateUser(userId, {
-    publicMetadata: { ...user.publicMetadata, paid: true },
+    publicMetadata: { ...user.publicMetadata, paidCount: currentCount + 1 },
   })
 
   return Response.json({ ok: true })

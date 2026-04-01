@@ -187,7 +187,8 @@ export default function Home() {
       })
       const projectData = await projectRes.json()
       if (projectRes.status === 403 && projectData.limitReached) {
-        throw new Error(projectData.error)
+        router.push('/pay')
+        return
       }
       if (!projectRes.ok) throw new Error(projectData.error ?? 'Failed to create project')
 
