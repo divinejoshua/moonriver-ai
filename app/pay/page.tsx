@@ -82,56 +82,59 @@ function PayPageInner() {
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-sm space-y-8 text-center">
-          <div className="space-y-3">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Get started with Moonriver
-            </h1>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              One-time payment to generate up to 10 AI UGC videos.
-            </p>
-          </div>
-
-          {/* Feature list */}
-          <div className="bg-card border border-border rounded-2xl p-5 text-left space-y-3">
-            {[
-              '10 AI-generated UGC videos',
-              'Avatar lip-sync voiceovers',
-              '100+ intro and outro hooks',
-              'Auto-captions & background music',
-              'Download in full quality',
-            ].map((feature) => (
-              <div key={feature} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                  <svg className="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="text-sm text-foreground">{feature}</span>
+      <main className="flex-1 flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-sm">
+          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+            {/* Price header */}
+            <div className="px-6 pt-8 pb-6 border-b border-border text-center space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Starter Pack</p>
+              <div className="flex items-end justify-center gap-1">
+                <span className="text-5xl font-bold tracking-tight text-foreground">$79</span>
               </div>
-            ))}
-          </div>
+              <p className="text-sm text-muted-foreground">one-time · no subscription</p>
+            </div>
 
-          <div className="space-y-3">
-            <button
-              onClick={handlePay}
-              disabled={loading}
-              className="w-full bg-primary hover:bg-primary/90 active:bg-primary/80 disabled:opacity-60 text-primary-foreground font-semibold py-3.5 rounded-xl transition-colors text-sm"
-            >
-              {loading ? 'Redirecting…' : 'Pay $79 — Get started'}
-            </button>
+            {/* Feature list */}
+            <div className="px-6 py-6 space-y-3">
+              {[
+                '10 AI-generated UGC videos',
+                'Avatar lip-sync voiceovers',
+                '100+ intro and outro hooks',
+                'Auto-captions & background music',
+                'Download in full quality',
+              ].map((feature) => (
+                <div key={feature} className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                    <svg className="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-foreground">{feature}</span>
+                </div>
+              ))}
+            </div>
 
-            {canceled && (
-              <p className="text-xs text-muted-foreground">Payment canceled. You can try again whenever you're ready.</p>
-            )}
-            {error && (
-              <p className="text-xs text-destructive">{error}</p>
-            )}
+            {/* CTA */}
+            <div className="px-6 pb-6 space-y-3">
+              <button
+                onClick={handlePay}
+                disabled={loading}
+                className="w-full bg-primary hover:bg-primary/90 active:bg-primary/80 disabled:opacity-60 text-primary-foreground font-semibold py-3.5 rounded-xl transition-colors text-sm"
+              >
+                {loading ? 'Redirecting…' : 'Get started'}
+              </button>
 
-            <p className="text-xs text-muted-foreground">
-              Secure payment via Stripe. One-time charge, no subscription.
-            </p>
+              {canceled && (
+                <p className="text-xs text-muted-foreground text-center">Payment canceled. You can try again whenever you're ready.</p>
+              )}
+              {error && (
+                <p className="text-xs text-destructive text-center">{error}</p>
+              )}
+
+              <p className="text-xs text-muted-foreground text-center">
+                Secure payment via Stripe
+              </p>
+            </div>
           </div>
         </div>
       </main>

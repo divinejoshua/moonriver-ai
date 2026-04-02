@@ -208,6 +208,9 @@ export default function Home() {
       />
 
       <Header sticky>
+        <Link href="/pay" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          Pricing
+        </Link>
         {isSignedIn ? (
           <UserButton />
         ) : (
@@ -441,6 +444,7 @@ export default function Home() {
             <span>© {new Date().getFullYear()} Wetrocloud Inc. All rights reserved.</span>
             <div className="flex items-center gap-4">
               <a href="mailto:hello@moonriverai.com" className="hover:text-foreground transition-colors">hello@moonriverai.com</a>
+              <Link href="/pay" className="hover:text-foreground transition-colors">Pricing</Link>
               <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
             </div>
