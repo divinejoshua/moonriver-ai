@@ -100,7 +100,7 @@ export default function Home() {
       .then((data) => {
         if (data.error) return
         setUsage(data)
-        if (justLoggedIn && !data.paid && !data.isAdmin) router.replace('/pay')
+        if (justLoggedIn && !data.paid && !data.isAdmin) router.replace('/pricing')
       })
       .catch(() => { })
   }, [isLoaded, isSignedIn])
@@ -150,7 +150,7 @@ export default function Home() {
     const raw = (urlOverride ?? url).trim()
     if (!validateUrl(raw)) return
     if (usage && !usage.paid && !usage.isAdmin) {
-      router.push('/pay')
+      router.push('/pricing')
       return
     }
     setError(null)
@@ -187,7 +187,7 @@ export default function Home() {
       })
       const projectData = await projectRes.json()
       if (projectRes.status === 403 && projectData.limitReached) {
-        router.push('/pay')
+        router.push('/pricing')
         return
       }
       if (!projectRes.ok) throw new Error(projectData.error ?? 'Failed to create project')
@@ -208,7 +208,7 @@ export default function Home() {
       />
 
       <Header sticky>
-        <Link href="/pay" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           Pricing
         </Link>
         {isSignedIn ? (
@@ -444,7 +444,7 @@ export default function Home() {
             <span>© {new Date().getFullYear()} Wetrocloud Inc. All rights reserved.</span>
             <div className="flex items-center gap-4">
               <a href="mailto:hello@moonriverai.com" className="hover:text-foreground transition-colors">hello@moonriverai.com</a>
-              <Link href="/pay" className="hover:text-foreground transition-colors">Pricing</Link>
+              <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
               <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
             </div>

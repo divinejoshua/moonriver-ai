@@ -6,7 +6,7 @@ import { useAuth, UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
 import Link from 'next/link'
 
-function PayPageInner() {
+function PricingPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { isSignedIn, isLoaded } = useAuth()
@@ -142,10 +142,10 @@ function PayPageInner() {
   )
 }
 
-export default function PayPage() {
+export default function PricingPage() {
   return (
     <Suspense>
-      <PayPageInner />
+      <PricingPageInner />
     </Suspense>
   )
 }

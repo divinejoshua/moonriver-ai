@@ -26,8 +26,8 @@ async function createCheckoutSession(userId: string) {
       },
     ],
     metadata: { userId },
-    success_url: `${appUrl}/pay?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${appUrl}/pay?canceled=true`,
+    success_url: `${appUrl}/pricing?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${appUrl}/pricing?canceled=true`,
   })
 }
 
@@ -40,7 +40,7 @@ export async function GET() {
   return Response.redirect(session.url!)
 }
 
-// Kept for the /pay page cancel flow (user clicks pay again after canceling)
+// Kept for the /pricing page cancel flow (user clicks pay again after canceling)
 export async function POST() {
   const { userId } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
