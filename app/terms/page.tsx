@@ -3,8 +3,8 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — Moonriver',
-  description: 'Terms of Service for Moonriver, an AI UGC video generator by Wetrocloud Inc.',
+  title: 'Terms of Service — ILoveUgc',
+  description: 'Terms of Service for ILoveUgc, an AI UGC video generator by Wetrocloud Inc.',
 }
 
 export default function TermsPage() {
@@ -13,8 +13,8 @@ export default function TermsPage() {
       {/* Minimal header */}
       <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3 shrink-0">
         <Link href="/" className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Moonriver" width={28} height={28} className="shrink-0" />
-          <span className="font-semibold text-base tracking-tight text-foreground">Moonriver</span>
+          <Image src="/logo.png" alt="ILoveUgc" width={28} height={28} className="shrink-0" />
+          <span className="font-semibold text-base tracking-tight text-foreground">ILoveUgc</span>
         </Link>
       </header>
 
@@ -30,21 +30,21 @@ export default function TermsPage() {
             <section className="space-y-3">
               <h2 className="text-base font-semibold">1. Agreement to Terms</h2>
               <p>
-                These Terms of Service ("Terms") govern your access to and use of Moonriver (the "Service"), operated by Wetrocloud Inc. ("we", "us", or "our"). By creating an account or using the Service, you agree to be bound by these Terms. If you do not agree, do not use the Service.
+                These Terms of Service ("Terms") govern your access to and use of ILoveUgc (the "Service"), operated by Wetrocloud Inc. ("we", "us", or "our"). By creating an account or using the Service, you agree to be bound by these Terms. If you do not agree, do not use the Service.
               </p>
             </section>
 
             <section className="space-y-3">
               <h2 className="text-base font-semibold">2. Description of Service</h2>
               <p>
-                Moonriver is an AI-powered platform that generates short-form UGC (user-generated content) style product review videos from a product URL. The Service uses third-party AI and media processing providers to generate scripts, voiceovers, lip-synced avatar videos, and captions.
+                ILoveUgc is an AI-powered platform that generates short-form UGC (user-generated content) style product review videos from a product URL. The Service uses third-party AI and media processing providers to generate scripts, voiceovers, lip-synced avatar videos, and captions.
               </p>
             </section>
 
             <section className="space-y-3">
               <h2 className="text-base font-semibold">3. Eligibility</h2>
               <p>
-                You must be at least 18 years old and capable of entering into a legally binding contract to use the Service. By using Moonriver you represent that you meet these requirements.
+                You must be at least 18 years old and capable of entering into a legally binding contract to use the Service. By using ILoveUgc you represent that you meet these requirements.
               </p>
             </section>
 
@@ -89,7 +89,7 @@ export default function TermsPage() {
                 You retain ownership of any product content you provide (URLs, images, videos). By using the Service you grant Wetrocloud Inc. a limited license to process that content solely to deliver the Service.
               </p>
               <p>
-                You own the videos generated for you. Wetrocloud Inc. retains all rights to the Moonriver platform, AI models, avatars, and infrastructure. You may not copy, reverse-engineer, or redistribute any part of the Service.
+                You own the videos generated for you. Wetrocloud Inc. retains all rights to the ILoveUgc platform, AI models, avatars, and infrastructure. You may not copy, reverse-engineer, or redistribute any part of the Service.
               </p>
             </section>
 

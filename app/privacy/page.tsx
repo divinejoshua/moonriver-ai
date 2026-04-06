@@ -3,8 +3,8 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Moonriver',
-  description: 'Privacy Policy for Moonriver, an AI UGC video generator by Wetrocloud Inc.',
+  title: 'Privacy Policy — ILoveUgc',
+  description: 'Privacy Policy for ILoveUgc, an AI UGC video generator by Wetrocloud Inc.',
 }
 
 export default function PrivacyPage() {
@@ -13,8 +13,8 @@ export default function PrivacyPage() {
       {/* Minimal header */}
       <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3 shrink-0">
         <Link href="/" className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Moonriver" width={28} height={28} className="shrink-0" />
-          <span className="font-semibold text-base tracking-tight text-foreground">Moonriver</span>
+          <Image src="/logo.png" alt="ILoveUgc" width={28} height={28} className="shrink-0" />
+          <span className="font-semibold text-base tracking-tight text-foreground">ILoveUgc</span>
         </Link>
       </header>
 
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
             <section className="space-y-3">
               <h2 className="text-base font-semibold">1. Overview</h2>
               <p>
-                Wetrocloud Inc. ("we", "us", or "our") operates Moonriver at moonriverai.com (the "Service"). This Privacy Policy explains what information we collect, how we use it, and your rights regarding that information. By using the Service you agree to the practices described here.
+                Wetrocloud Inc. ("we", "us", or "our") operates ILoveUgc at moonriverai.com (the "Service"). This Privacy Policy explains what information we collect, how we use it, and your rights regarding that information. By using the Service you agree to the practices described here.
               </p>
             </section>
 

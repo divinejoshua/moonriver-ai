@@ -10,11 +10,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Moonriver — Create Viral UGC Ads in minutes",
+  title: "ILoveUgc — Create Viral UGC Ads in minutes",
   description:
     "Turn any product link into a TikTok-ready UGC review video in minutes. AI script, avatar voiceover, auto-captions, and background music. 100K+ views generated.",
   openGraph: {
-    title: "Moonriver — Create Viral UGC Ads in minutes",
+    title: "ILoveUgc — Create Viral UGC Ads in minutes",
     description:
       "Turn any product link into a TikTok-ready UGC review video in minutes. 100K+ views generated.",
     type: "website",

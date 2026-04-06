@@ -12,7 +12,7 @@ export default function ProofVideos() {
     <section className="border-t border-border px-4 py-20">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-2xl font-bold text-foreground">Videos made with Moonriver</h2>
+          <h2 className="text-2xl font-bold text-foreground">Videos made with ILoveUgc</h2>
           <p className="text-muted-foreground text-sm mt-2">Real UGC videos generated on this platform</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

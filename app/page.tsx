@@ -9,7 +9,7 @@ import ProofVideos from './components/ProofVideos'
 
 type Step = 'input' | 'generating'
 
-const PENDING_URL_KEY = 'moonriver_pending_url'
+const PENDING_URL_KEY = 'iloveugc_pending_url'
 
 
 const TESTIMONIALS = [
@@ -17,7 +17,7 @@ const TESTIMONIALS = [
     name: 'Jamie L.',
     role: 'Shopify Store Owner',
     initials: 'JL',
-    body: 'Posted the first video on TikTok and got 45k views in 48 hours. Moonriver saves me hours every single week.',
+    body: 'Posted the first video on TikTok and got 45k views in 48 hours. ILoveUgc saves me hours every single week.',
   },
   {
     name: 'Marcus D.',
@@ -35,8 +35,8 @@ const TESTIMONIALS = [
 
 const FAQS = [
   {
-    q: 'What products work best with Moonriver?',
-    a: 'Any product with a public URL — Shopify stores, Amazon listings, DTC landing pages, apps, and SaaS products. If it has a webpage, Moonriver can turn it into a video.',
+    q: 'What products work best with ILoveUgc?',
+    a: 'Any product with a public URL — Shopify stores, Amazon listings, DTC landing pages, apps, and SaaS products. If it has a webpage, ILoveUgc can turn it into a video.',
   },
   {
     q: 'How long does video generation take?',
@@ -367,7 +367,7 @@ export default function Home() {
           <section className="px-4 py-20">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
-                <h2 className="text-2xl font-bold text-foreground">Creators love Moonriver</h2>
+                <h2 className="text-2xl font-bold text-foreground">Creators love ILoveUgc</h2>
                 <p className="text-muted-foreground text-sm mt-2">
                   Over 100,000 views generated from videos made on this platform
                 </p>

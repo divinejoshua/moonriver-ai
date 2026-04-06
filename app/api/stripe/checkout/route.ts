@@ -17,7 +17,7 @@ async function createCheckoutSession(userId: string) {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: 'Moonriver — 10 UGC Videos',
+            name: 'ILoveUgc — 10 UGC Videos',
             description: 'One-time access to generate up to 10 AI-powered UGC videos.',
           },
           unit_amount: 7900,
