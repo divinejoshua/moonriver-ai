@@ -16,11 +16,6 @@ function PricingPageInner() {
   const sessionId = searchParams.get('session_id')
   const canceled = searchParams.get('canceled') === 'true'
 
-  // Redirect signed-out users to home
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) router.replace('/')
-  }, [isLoaded, isSignedIn, router])
-
   // Verify payment with Stripe directly, then go home
   useEffect(() => {
     if (!sessionId || !isSignedIn) return
@@ -39,6 +34,10 @@ function PricingPageInner() {
   }, [sessionId, isSignedIn])
 
   async function handlePay() {
+    if (!isSignedIn) {
+      router.push('/sign-in?redirect_url=/pricing')
+      return
+    }
     setLoading(true)
     setError(null)
     try {
