@@ -25,6 +25,7 @@ async function createCheckoutSession(userId: string) {
         quantity: 1,
       },
     ],
+    allow_promotion_codes: true,
     metadata: { userId },
     success_url: `${appUrl}/pricing?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/pricing?canceled=true`,
