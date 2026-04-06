@@ -32,6 +32,7 @@ export default function RootLayout({
         lang="en"
         className={`${inter.variable} h-full antialiased`}
       >
+        <meta name="google-site-verification" content="Spd6vZggACBCo3IxsTgrXWVufSqSGpBDaoIOCBEl7JU" />
         <body className="min-h-full flex flex-col">{children}</body>
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-34BF8SH5HS" />
         <Script id="google-analytics">
