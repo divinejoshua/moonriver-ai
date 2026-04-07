@@ -57,17 +57,13 @@ export async function POST(req: Request) {
   const paidCount = (clerkUser.publicMetadata?.paidCount as number) ?? 0
   const isPaid = paidCount > 0
 
-  if (!isPaid && !isAdmin) {
-    return Response.json({ error: 'Payment required.', paymentRequired: true }, { status: 403 })
-  }
-
   if (!isAdmin) {
     const { count } = await supabase
       .from('projects')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
 
-    const effectiveLimit = paidCount * USAGE_LIMIT
+    const effectiveLimit = paidCount === 0 ? 1 : paidCount * USAGE_LIMIT
     if ((count ?? 0) >= effectiveLimit) {
       return Response.json(
         { error: `You've reached your ${effectiveLimit} video limit.`, limitReached: true },

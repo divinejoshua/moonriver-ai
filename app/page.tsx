@@ -101,14 +101,14 @@ export default function Home() {
       .then((data) => {
         if (data.error) return
         setUsage(data)
-        if (justLoggedIn && !data.paid && !data.isAdmin) router.replace('/pricing')
+        if (justLoggedIn && !data.paid && !data.isAdmin && data.used >= data.limit) router.replace('/pricing')
       })
       .catch(() => { })
   }, [isLoaded, isSignedIn])
 
   // Auto-generate after sign-in if the user had typed a URL and has paid
   useEffect(() => {
-    if (!isLoaded || !isSignedIn || !usage || !usage.paid || didAutoGenerate.current) return
+    if (!isLoaded || !isSignedIn || !usage || didAutoGenerate.current) return
     const pending = sessionStorage.getItem(PENDING_URL_KEY)
     if (!pending) return
     didAutoGenerate.current = true
@@ -150,10 +150,6 @@ export default function Home() {
   async function handleGenerate(urlOverride?: string) {
     const raw = (urlOverride ?? url).trim()
     if (!validateUrl(raw)) return
-    if (usage && !usage.paid && !usage.isAdmin) {
-      router.push('/pricing')
-      return
-    }
     setError(null)
     setStep('generating')
     const target = `https://${raw}`

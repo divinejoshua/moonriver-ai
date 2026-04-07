@@ -23,6 +23,6 @@ export async function GET() {
     .eq('user_id', userId)
 
   const used = count ?? 0
-  const limit = paidCount * USAGE_LIMIT
+  const limit = paidCount === 0 ? 1 : paidCount * USAGE_LIMIT
   return Response.json({ isAdmin: false, paid: isPaid, used, limit })
 }
