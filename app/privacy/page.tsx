@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Footer from '../components/Footer'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 
@@ -150,14 +151,7 @@ export default function PrivacyPage() {
         </div>
       </main>
 
-      <footer className="border-t border-border px-6 py-6 flex items-center justify-between text-xs text-muted-foreground">
-        <span>© {new Date().getFullYear()} Wetrocloud Inc. All rights reserved.</span>
-        <div className="flex items-center gap-4">
-          <a href="mailto:hello@iloveugc.ai" className="hover:text-foreground transition-colors">hello@iloveugc.ai</a>
-          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
