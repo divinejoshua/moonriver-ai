@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
 import Link from 'next/link'
+import Footer from '../components/Footer'
 
 function PricingPageInner() {
   const router = useRouter()
@@ -69,7 +70,7 @@ function PricingPageInner() {
   }
 
   return (
-    <div className="h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Minimal header */}
       <header className="border-b border-border bg-card px-6 py-4 flex items-center gap-3">
         <Link href="/" className="flex items-center gap-3">
@@ -137,6 +138,7 @@ function PricingPageInner() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }
