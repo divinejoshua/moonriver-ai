@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     description:
       "Turn any product link into a TikTok-ready UGC review video in minutes. 100K+ views generated.",
     type: "website",
-    images: ["/meta.png"],
+    images: ["https://iloveugc.ai/meta.png"],
   },
 };
 
