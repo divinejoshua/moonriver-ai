@@ -31,7 +31,7 @@ export default function PrivacyPage() {
             <section className="space-y-3">
               <h2 className="text-base font-semibold">1. Overview</h2>
               <p>
-                Wetrocloud Inc. ("we", "us", or "our") operates ILoveUgc at moonriverai.com (the "Service"). This Privacy Policy explains what information we collect, how we use it, and your rights regarding that information. By using the Service you agree to the practices described here.
+                Wetrocloud Inc. ("we", "us", or "our") operates ILoveUgc at iloveugc.ai (the "Service"). This Privacy Policy explains what information we collect, how we use it, and your rights regarding that information. By using the Service you agree to the practices described here.
               </p>
             </section>
 
@@ -116,7 +116,7 @@ export default function PrivacyPage() {
               <h2 className="text-base font-semibold">7. Your Rights</h2>
               <p>
                 Depending on your jurisdiction you may have the right to access, correct, or delete your personal data. To exercise any of these rights, email us at{' '}
-                <a href="mailto:hello@moonriverai.com" className="text-primary hover:underline">hello@moonriverai.com</a>.
+                <a href="mailto:hello@iloveugc.ai" className="text-primary hover:underline">hello@iloveugc.ai</a>.
                 We will respond within 30 days.
               </p>
             </section>
@@ -139,11 +139,10 @@ export default function PrivacyPage() {
               <h2 className="text-base font-semibold">10. Contact</h2>
               <p>
                 Questions or concerns about this Privacy Policy? Contact us at{' '}
-                <a href="mailto:hello@moonriverai.com" className="text-primary hover:underline">hello@moonriverai.com</a>.
+                <a href="mailto:hello@iloveugc.ai" className="text-primary hover:underline">hello@iloveugc.ai</a>.
               </p>
               <p className="text-muted-foreground">
-                Wetrocloud Inc.<br />
-                hello@moonriverai.com
+                hello@iloveugc.ai
               </p>
             </section>
 

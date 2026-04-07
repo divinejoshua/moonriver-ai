@@ -53,7 +53,7 @@ export default function TermsPage() {
               <h2 className="text-base font-semibold">4. Account Registration</h2>
               <p>
                 You must create an account to use the Service. You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account. Notify us immediately at{' '}
-                <a href="mailto:hello@moonriverai.com" className="text-primary hover:underline">hello@moonriverai.com</a>{' '}
+                <a href="mailto:hello@iloveugc.ai" className="text-primary hover:underline">hello@iloveugc.ai</a>{' '}
                 if you suspect unauthorized access.
               </p>
             </section>
@@ -126,7 +126,7 @@ export default function TermsPage() {
               <h2 className="text-base font-semibold">12. Contact</h2>
               <p>
                 Questions about these Terms? Contact us at{' '}
-                <a href="mailto:hello@moonriverai.com" className="text-primary hover:underline">hello@moonriverai.com</a>.
+                <a href="mailto:hello@iloveugc.ai" className="text-primary hover:underline">hello@iloveugc.ai</a>.
               </p>
             </section>
 
