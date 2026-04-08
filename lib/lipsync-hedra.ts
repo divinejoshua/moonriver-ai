@@ -51,13 +51,14 @@ async function submitGeneration(params: {
   durationMs: number
 }): Promise<string> {
   const body = {
+    type: 'video',
     ai_model_id: params.modelId,
     start_keyframe_id: params.imageAssetId,
     audio_id: params.audioAssetId,
     generated_video_inputs: {
       text_prompt: 'A person talking directly to the camera',
-      resolution: '720p',
-      aspect_ratio: '9:16',
+      resolution: '540p',
+      aspect_ratio: '16:9',
       duration_ms: params.durationMs,
     },
   }
