@@ -274,7 +274,17 @@ export default function GeneratingPage({
 
   const allDone = stages.every((s) => s.status === 'done')
   const hasError = stages.some((s) => s.status === 'error')
+  const isInProgress = !allDone && !hasError
   const avatar = AVATARS[project?.selected_avatar ?? 0]
+
+  useEffect(() => {
+    if (!isInProgress) return
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [isInProgress])
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -299,6 +309,18 @@ export default function GeneratingPage({
                   : 'Sit tight while we build each asset.'}
             </p>
           </div>
+
+          {/* Do-not-close warning */}
+          {isInProgress && (
+            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+              <svg className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+              <p className="text-xs text-amber-800">
+                Do not close or refresh this page while your video is being generated. You may lose progress.
+              </p>
+            </div>
+          )}
 
           {/* Final video — shown above stages when ready */}
           {finalVideoUrl && (
