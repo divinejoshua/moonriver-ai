@@ -20,7 +20,7 @@ async function createAsset(type: 'image' | 'audio', name: string): Promise<strin
 
 async function uploadAsset(assetId: string, fileBuffer: Buffer, filename: string, mimeType: string): Promise<void> {
   const formData = new FormData()
-  formData.append('file', new Blob([fileBuffer], { type: mimeType }), filename)
+  formData.append('file', new Blob([fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength)], { type: mimeType }), filename)
 
   const res = await fetch(`${HEDRA_BASE_URL}/assets/${assetId}/upload`, {
     method: 'POST',
