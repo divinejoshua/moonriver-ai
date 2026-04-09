@@ -8,8 +8,8 @@ const client = new SendMailClient({
 export async function sendVideoReadyEmail(toEmail: string, toName: string, projectId: string): Promise<void> {
   await client.sendMail({
     from: {
-      address: 'noreply@tabseditor.com',
-      name: 'Moonriver',
+      address: 'noreply@iloveugc.ai',
+      name: 'ILoveUGC',
     },
     to: [
       {
@@ -33,7 +33,7 @@ export async function sendVideoReadyEmail(toEmail: string, toName: string, proje
           View &amp; Download
         </a>
         <p style="color: #999; font-size: 12px; margin-top: 32px;">
-          You received this email because you generated a video on Moonriver.
+          You received this email because you generated a video on https://iloveugc.ai.
         </p>
       </div>
     `,
