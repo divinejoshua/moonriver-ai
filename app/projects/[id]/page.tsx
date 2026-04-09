@@ -103,7 +103,7 @@ export default function ProjectPage({
     setSaving(true)
     setError(null)
     try {
-      const res = await fetch(`/api/projects/${id}`, {
+      const patchRes = await fetch(`/api/projects/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -113,12 +113,25 @@ export default function ProjectPage({
           product_media_url: productMedia.s3Url,
           product_media_type: productMedia.type,
           status: 'generating',
+          // Reset intermediate URLs so the pipeline re-runs all stages
+          audio_url: null,
+          lipsync_video_url: null,
+          merged_video_url: null,
+          captioned_video_url: null,
+          final_video_url: null,
         }),
       })
-      if (!res.ok) {
-        const data = await res.json()
+      if (!patchRes.ok) {
+        const data = await patchRes.json()
         throw new Error(data.error ?? 'Failed to save project')
       }
+
+      const genRes = await fetch(`/api/projects/${id}/generate`, { method: 'POST' })
+      if (!genRes.ok) {
+        const data = await genRes.json()
+        throw new Error(data.error ?? 'Failed to start generation')
+      }
+
       router.push(`/projects/${id}/generating`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
