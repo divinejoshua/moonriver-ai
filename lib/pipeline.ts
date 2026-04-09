@@ -3,6 +3,7 @@ import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
 import { fal } from '@fal-ai/client'
+import { clerkClient } from '@clerk/nextjs/server'
 import { supabase, type Project } from '@/lib/supabase'
 import { uploadToS3, getS3Url, getPresignedUrl, toFetchableUrl } from '@/lib/s3'
 import { mergeVideo } from '@/lib/merge-video'
@@ -10,6 +11,7 @@ import { captionVideo } from '@/lib/caption-video'
 import { addBgm } from '@/lib/add-bgm'
 import { generateLipsyncWithHedra } from '@/lib/lipsync-hedra'
 import { AVATARS, AVATAR_VOICE_MAP } from '@/lib/constants'
+import { sendVideoReadyEmail } from '@/lib/email'
 
 fal.config({ credentials: process.env.FAL_API_KEY })
 
@@ -29,6 +31,20 @@ async function updateProject(id: string, updates: Partial<Project>) {
     .from('projects')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
+}
+
+async function notifyUser(userId: string, projectId: string): Promise<void> {
+  try {
+    const clerk = await clerkClient()
+    const user = await clerk.users.getUser(userId)
+    const email = user.emailAddresses[0]?.emailAddress
+    if (!email) return
+    const name = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'there'
+    await sendVideoReadyEmail(email, name, projectId)
+  } catch (err) {
+    // Email failure must never affect the generation result
+    console.error(`[pipeline] Failed to send email for project ${projectId}:`, err)
+  }
 }
 
 async function generateAudio(script: string, voiceId: string): Promise<Buffer> {
@@ -186,6 +202,7 @@ export async function runPipeline(projectId: string, project: Project): Promise<
 
     if (!music_url) {
       await updateProject(projectId, { final_video_url: captionedUrl, status: 'done' })
+      await notifyUser(project.user_id, projectId)
       return
     }
 
@@ -211,6 +228,7 @@ export async function runPipeline(projectId: string, project: Project): Promise<
 
       const key = await uploadToS3(await readFile(outputPath), 'merged', `final_${Date.now()}.mp4`, 'video/mp4')
       await updateProject(projectId, { final_video_url: getS3Url(key), status: 'done' })
+      await notifyUser(project.user_id, projectId)
     } finally {
       await Promise.allSettled([
         unlink(videoPath).catch(() => {}),
