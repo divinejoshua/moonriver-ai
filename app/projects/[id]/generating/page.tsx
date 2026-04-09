@@ -17,11 +17,11 @@ interface Stage {
 }
 
 const STAGE_DEFS = [
-  { id: 'audio',   label: 'Generating voiceover',    description: 'Synthesising speech' },
-  { id: 'lipsync', label: 'Generating lipsync',       description: 'Adding lip sync to avatar' },
-  { id: 'merge',   label: 'Merging video',            description: 'Combining product media with lipsync' },
-  { id: 'caption', label: 'Adding captions',          description: 'Burning voiceover script as captions' },
-  { id: 'bgm',     label: 'Adding background music',  description: 'Mixing in background track at low volume' },
+  { id: 'audio', label: 'Generating voiceover', description: 'Synthesising speech' },
+  { id: 'lipsync', label: 'Generating lipsync', description: 'Adding lip sync to avatar' },
+  { id: 'merge', label: 'Merging video', description: 'Combining product media with lipsync' },
+  { id: 'caption', label: 'Adding captions', description: 'Burning voiceover script as captions' },
+  { id: 'bgm', label: 'Adding background music', description: 'Mixing in background track at low volume' },
 ]
 
 function deriveStages(project: Project): Stage[] {
@@ -35,11 +35,11 @@ function deriveStages(project: Project): Stage[] {
   } = project
 
   const completed = {
-    audio:   !!audio_url,
+    audio: !!audio_url,
     lipsync: !!lipsync_video_url,
-    merge:   !!merged_video_url,
+    merge: !!merged_video_url,
     caption: !!captioned_video_url,
-    bgm:     !!final_video_url || (status === 'done' && !project.music_url),
+    bgm: !!final_video_url || (status === 'done' && !project.music_url),
   }
 
   return STAGE_DEFS.map((def) => {
@@ -143,7 +143,7 @@ export default function GeneratingPage({
                 ? 'Your UGC video is ready below.'
                 : hasError
                   ? 'One or more stages failed. Go back and try again.'
-                  : 'This is running in the background — you can safely close this tab.'}
+                  : 'This is running in the background — Videos can take from 1 - 5 Minutes'}
             </p>
           </div>
 
@@ -215,15 +215,13 @@ export default function GeneratingPage({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${
-                    stage.status === 'pending' ? 'text-muted-foreground' :
-                    stage.status === 'error'   ? 'text-destructive'      : 'text-foreground'
-                  }`}>
+                  <p className={`text-sm font-medium ${stage.status === 'pending' ? 'text-muted-foreground' :
+                      stage.status === 'error' ? 'text-destructive' : 'text-foreground'
+                    }`}>
                     {stage.label}
                   </p>
-                  <p className={`text-xs mt-0.5 ${
-                    stage.status === 'pending' ? 'text-muted-foreground/50' : 'text-muted-foreground'
-                  }`}>
+                  <p className={`text-xs mt-0.5 ${stage.status === 'pending' ? 'text-muted-foreground/50' : 'text-muted-foreground'
+                    }`}>
                     {stage.description}
                   </p>
                 </div>
