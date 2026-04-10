@@ -2,8 +2,6 @@ import { auth, clerkClient } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
 import { extractS3Key, getPresignedUrl } from '@/lib/s3'
 
-const USAGE_LIMIT = 10
-
 // Fields that store plain S3 URLs — freshened to presigned URLs before returning to clients
 const S3_URL_FIELDS = [
   'product_media_url',
@@ -47,23 +45,30 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
+  const { userId, has } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Check payment + admin status
+  // Check subscription + admin status
   const clerk = await clerkClient()
   const clerkUser = await clerk.users.getUser(userId)
   const isAdmin = clerkUser.publicMetadata?.admin === true
-  const paidCount = (clerkUser.publicMetadata?.paidCount as number) ?? 0
-  const isPaid = paidCount > 0
 
   if (!isAdmin) {
+    const hasGrowth = has({ plan: 'growth' })
+    const hasBasic = has({ plan: 'basic' })
+    const paidCount = (clerkUser.publicMetadata?.paidCount as number) ?? 0
+
+    let effectiveLimit: number
+    if (hasGrowth) effectiveLimit = 25
+    else if (hasBasic) effectiveLimit = 10
+    else if (paidCount > 0) effectiveLimit = paidCount * 10
+    else effectiveLimit = 1
+
     const { count } = await supabase
       .from('projects')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
 
-    const effectiveLimit = paidCount === 0 ? 1 : paidCount * USAGE_LIMIT
     if ((count ?? 0) >= effectiveLimit) {
       return Response.json(
         { error: `You've reached your ${effectiveLimit} video limit.`, limitReached: true },

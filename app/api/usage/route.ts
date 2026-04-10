@@ -1,20 +1,37 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
 
-const USAGE_LIMIT = 10
-
 export async function GET() {
-  const { userId } = await auth()
+  const { userId, has } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const clerk = await clerkClient()
   const clerkUser = await clerk.users.getUser(userId)
   const isAdmin = clerkUser.publicMetadata?.admin === true
-  const paidCount = (clerkUser.publicMetadata?.paidCount as number) ?? 0
-  const isPaid = paidCount > 0
 
   if (isAdmin) {
-    return Response.json({ isAdmin: true, paid: true, used: 0, limit: USAGE_LIMIT })
+    return Response.json({ isAdmin: true, paid: true, used: 0, limit: 25 })
+  }
+
+  const hasGrowth = has({ plan: 'growth' })
+  const hasBasic = has({ plan: 'basic' })
+  // Legacy: users who paid via Stripe before subscriptions were introduced
+  const paidCount = (clerkUser.publicMetadata?.paidCount as number) ?? 0
+
+  let limit: number
+  let isPaid: boolean
+  if (hasGrowth) {
+    limit = 25
+    isPaid = true
+  } else if (hasBasic) {
+    limit = 10
+    isPaid = true
+  } else if (paidCount > 0) {
+    limit = paidCount * 10
+    isPaid = true
+  } else {
+    limit = 1
+    isPaid = false
   }
 
   const { count } = await supabase
@@ -23,6 +40,5 @@ export async function GET() {
     .eq('user_id', userId)
 
   const used = count ?? 0
-  const limit = paidCount === 0 ? 1 : paidCount * USAGE_LIMIT
   return Response.json({ isAdmin: false, paid: isPaid, used, limit })
 }

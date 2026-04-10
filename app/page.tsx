@@ -57,7 +57,7 @@ const FAQS = [
   },
   {
     q: 'How many videos do I get?',
-    a: 'The one-time purchase includes 20 videos with no monthly fees. Need more? Additional packs are available from your dashboard.',
+    a: 'You get 1 free video to try it out — no credit card needed. The Basic plan ($19/month) includes 10 videos per month, and the Growth plan ($39/month) includes 25 videos per month.',
   },
 ]
 
