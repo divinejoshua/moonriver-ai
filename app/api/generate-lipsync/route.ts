@@ -33,18 +33,13 @@ export async function POST(request: Request) {
 
   let videoBuffer: Buffer
 
-  if (provider === 'hedra') {
+  async function runHedra(): Promise<Buffer> {
     // Estimate audio duration from buffer size (rough: MP3 ~128kbps → 16000 bytes/sec)
     const audioDurationMs = Math.ceil((audioBuffer.byteLength / 16000) * 1000)
-    videoBuffer = await generateLipsyncWithHedra(
-      imageBuffer,
-      imageFile,
-      imageMimeType,
-      audioBuffer,
-      audioDurationMs,
-    )
-  } else {
-    // Default: VEED via FAL AI
+    return generateLipsyncWithHedra(imageBuffer, imageFile, imageMimeType, audioBuffer, audioDurationMs)
+  }
+
+  async function runVeed(): Promise<Buffer> {
     const imageKey = await uploadToS3(imageBuffer, 'images', imageFile, imageMimeType)
     const imageUrl = await getPresignedUrl(imageKey, 3600)
 
@@ -53,21 +48,30 @@ export async function POST(request: Request) {
     const audioUrl = await getPresignedUrl(audioKey, 3600)
 
     const result = await fal.subscribe('veed/fabric-1.0', {
-      input: {
-        image_url: imageUrl,
-        audio_url: audioUrl,
-        resolution: '480p',
-      },
+      input: { image_url: imageUrl, audio_url: audioUrl, resolution: '480p' },
     })
 
     const output = result.data as { video?: { url: string } }
-    const lipsyncVideoUrl = output?.video?.url
-    if (!lipsyncVideoUrl) {
-      return Response.json({ error: 'No video returned from VEED' }, { status: 500 })
-    }
+    const url = output?.video?.url
+    if (!url) throw new Error('No video returned from VEED')
+    const videoRes = await fetch(url)
+    return Buffer.from(await videoRes.arrayBuffer())
+  }
 
-    const videoRes = await fetch(lipsyncVideoUrl)
-    videoBuffer = Buffer.from(await videoRes.arrayBuffer())
+  if (provider === 'hedra') {
+    try {
+      videoBuffer = await runHedra()
+    } catch (hedraErr) {
+      console.error('[generate-lipsync] Hedra failed, falling back to VEED:', hedraErr)
+      videoBuffer = await runVeed()
+    }
+  } else {
+    try {
+      videoBuffer = await runVeed()
+    } catch (veedErr) {
+      console.error('[generate-lipsync] VEED failed, falling back to Hedra:', veedErr)
+      videoBuffer = await runHedra()
+    }
   }
 
   const videoFilename = `lipsync-${Date.now()}.mp4`

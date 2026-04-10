@@ -103,17 +103,12 @@ export async function runPipeline(projectId: string, project: Project): Promise<
       const provider = (process.env.LIPSYNC_PROVIDER ?? 'veed').toLowerCase()
       let videoBuffer: Buffer
 
-      if (provider === 'hedra') {
+      async function runHedra(): Promise<Buffer> {
         const audioDurationMs = Math.ceil((audioBuffer.byteLength / 16000) * 1000)
-        videoBuffer = await generateLipsyncWithHedra(
-          imageBuffer,
-          imageFile,
-          imageMimeType,
-          audioBuffer,
-          audioDurationMs,
-        )
-      } else {
-        // VEED via FAL
+        return generateLipsyncWithHedra(imageBuffer, imageFile, imageMimeType, audioBuffer, audioDurationMs)
+      }
+
+      async function runVeed(): Promise<Buffer> {
         const imageKey = await uploadToS3(imageBuffer, 'images', imageFile, imageMimeType)
         const imageUrl = await getPresignedUrl(imageKey, 3600)
         const audioFilename = `audio-${Date.now()}.mp3`
@@ -127,7 +122,23 @@ export async function runPipeline(projectId: string, project: Project): Promise<
         const url = output?.video?.url
         if (!url) throw new Error('No video returned from VEED')
         const videoRes = await fetch(url)
-        videoBuffer = Buffer.from(await videoRes.arrayBuffer())
+        return Buffer.from(await videoRes.arrayBuffer())
+      }
+
+      if (provider === 'hedra') {
+        try {
+          videoBuffer = await runHedra()
+        } catch (hedraErr) {
+          console.error(`[pipeline] Hedra failed for project ${projectId}, falling back to VEED:`, hedraErr)
+          videoBuffer = await runVeed()
+        }
+      } else {
+        try {
+          videoBuffer = await runVeed()
+        } catch (veedErr) {
+          console.error(`[pipeline] VEED failed for project ${projectId}, falling back to Hedra:`, veedErr)
+          videoBuffer = await runHedra()
+        }
       }
 
       const videoKey = await uploadToS3(videoBuffer, 'lipsync', `lipsync-${Date.now()}.mp4`, 'video/mp4')
@@ -166,7 +177,7 @@ export async function runPipeline(projectId: string, project: Project): Promise<
       } finally {
         const { readdir } = await import('fs/promises')
         const files = await readdir(tmpDir).catch(() => [] as string[])
-        await Promise.allSettled(files.map((f) => unlink(path.join(tmpDir, f)).catch(() => {})))
+        await Promise.allSettled(files.map((f) => unlink(path.join(tmpDir, f)).catch(() => { })))
       }
     }
 
@@ -191,8 +202,8 @@ export async function runPipeline(projectId: string, project: Project): Promise<
         await updateProject(projectId, { captioned_video_url: captionedUrl })
       } finally {
         await Promise.allSettled([
-          unlink(inputPath).catch(() => {}),
-          unlink(outputPath).catch(() => {}),
+          unlink(inputPath).catch(() => { }),
+          unlink(outputPath).catch(() => { }),
         ])
       }
     }
@@ -231,9 +242,9 @@ export async function runPipeline(projectId: string, project: Project): Promise<
       await notifyUser(project.user_id, projectId)
     } finally {
       await Promise.allSettled([
-        unlink(videoPath).catch(() => {}),
-        unlink(musicPath).catch(() => {}),
-        unlink(outputPath).catch(() => {}),
+        unlink(videoPath).catch(() => { }),
+        unlink(musicPath).catch(() => { }),
+        unlink(outputPath).catch(() => { }),
       ])
     }
   } catch (err) {
