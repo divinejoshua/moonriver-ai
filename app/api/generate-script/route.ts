@@ -86,9 +86,6 @@ ${buildHookBank()}
 
 [SOCIAL PROOF — one stat, user count, personal result, or credible claim from the product page]
 
-[CTA — always use this exact wording:]
-"If you want my step-by-step guide on how to use [Product Name], go comment 'hidden' below and I'll send it straight to you."
-
 ## Rules
 - Total script length: 80–100 words (short and punchy — keep it tight)
 - Never open with "I" — start with the hook immediately
