@@ -57,7 +57,7 @@ const FAQS = [
   },
   {
     q: 'How many videos do I get?',
-    a: 'You get 1 free video to try it out — no credit card needed. The Basic plan ($19/month) includes 10 videos per month, and the Growth plan ($39/month) includes 25 videos per month.',
+    a: 'You get 1 free video to try it out — no credit card needed. The Basic plan ($39/month) includes 10 videos per month, and the Growth plan ($79/month) includes 25 videos per month.',
   },
 ]
 
