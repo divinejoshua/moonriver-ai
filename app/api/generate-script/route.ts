@@ -74,25 +74,45 @@ Pick the single best hook from the list below that matches this product's strong
 
 ${buildHookBank()}
 
+## Tone & Style
+Write like these examples — fragmented, spoken-word sentences, short punchy lines with line breaks between thoughts:
+
+Example A:
+"This honestly feels illegal…
+
+You can create UGC ads without filming anything.
+
+I'm using iloveugc.ai—it gives you realistic AI creators that talk like real people.
+
+I just write a script, choose an avatar, and boom… video done.
+
+If you're running ads or building a brand, this saves SO much time."
+
+Example B:
+"I was literally paying £200 per UGC video… waiting days for creators, revisions, all of that.
+
+Now I just use iloveugc.ai.
+
+I can test different hooks, angles, and scripts in minutes instead of weeks.
+
+It's basically how I'm scaling my ads right now."
+
 ## Script Structure (follow exactly, every time)
 
-[HOOK — 1-2 punchy sentences from the hook bank above]
+[HOOK — 1 punchy sentence from the hook bank above, filled in with product-specific details]
 
-[BRIDGE — 1 sentence connecting the hook to the product]
+[PROBLEM or CONTRAST — 1-2 short lines on what the old way cost them]
 
-[PRODUCT INTRO — name it, what it does in plain English, 2-3 sentences max]
+[PRODUCT INTRO — name it, what it does in one plain sentence]
 
-[KEY BENEFIT — the single most impressive feature or outcome, shown not told]
-
-[SOCIAL PROOF — one stat, user count, personal result, or credible claim from the product page]
+[KEY RESULT — one concrete personal outcome, shown not told]
 
 ## Rules
-- Total script length: 80–100 words (short and punchy — keep it tight)
-- Never open with "I" — start with the hook immediately
-- No buzzwords: never say "game-changer", "revolutionary", "cutting-edge", "amazing" — show results instead
-- The hook must feel native to social media, not like an ad or press release
+- Total script length: 45–65 words, 350 characters max — ruthlessly short
+- Never open with "I" — start with the hook
+- Fragmented sentence style — short lines, natural pauses, like talking out loud
+- No buzzwords: never say "game-changer", "revolutionary", "cutting-edge", "amazing"
 - Fill in all [placeholders] with real product-specific details from the page
-- If a social proof stat isn't on the page, use a personal result framing instead
 - Output ONLY the script text — no labels, headers, section names, or formatting marks`
 }
 

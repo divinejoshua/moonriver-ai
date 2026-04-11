@@ -201,16 +201,22 @@ export default function ProjectPage({
             <section className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground">Voiceover Script</label>
-                <button
-                  onClick={handleRegenerate}
-                  className="text-xs text-primary hover:text-primary/80 transition-colors"
-                >
-                  Regenerate
-                </button>
+                <div className="flex items-center gap-3">
+                  <span className={`text-xs tabular-nums ${script.length > 400 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    {script.length}/400
+                  </span>
+                  <button
+                    onClick={handleRegenerate}
+                    className="text-xs text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Regenerate
+                  </button>
+                </div>
               </div>
               <textarea
                 value={script}
                 onChange={(e) => setScript(e.target.value)}
+                maxLength={400}
                 rows={9}
                 className="w-full bg-card border border-border rounded-xl px-4 py-3 text-foreground text-sm leading-relaxed focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring resize-none placeholder:text-muted-foreground shadow-sm"
               />
