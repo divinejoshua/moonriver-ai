@@ -84,6 +84,19 @@ export default function GeneratingPage({
   const [stages, setStages] = useState<Stage[]>(STAGE_DEFS.map((d) => ({ ...d, status: 'pending' })))
   const [finalVideoUrl, setFinalVideoUrl] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Tracks whether we've already auto-retried this page load — resets on every refresh
+  const hasRetriedRef = useRef(false)
+
+  async function resumePipeline() {
+    // Reset status to 'generating' — completed stage URLs are kept so the
+    // pipeline resumes from the failed stage rather than starting over.
+    await fetch(`/api/projects/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'generating' }),
+    })
+    await fetch(`/api/projects/${id}/generate`, { method: 'POST' })
+  }
 
   async function poll() {
     try {
@@ -97,14 +110,19 @@ export default function GeneratingPage({
 
       if (data.status === 'done') {
         setFinalVideoUrl(data.final_video_url)
-        return // stop polling
+        return
       }
 
       if (data.status === 'error') {
-        return // stop polling
+        // Auto-resume once per page load. A refresh gives a fresh chance to retry.
+        if (!hasRetriedRef.current) {
+          hasRetriedRef.current = true
+          await resumePipeline()
+          pollRef.current = setTimeout(poll, POLL_INTERVAL)
+        }
+        return
       }
 
-      // still generating — schedule next poll
       pollRef.current = setTimeout(poll, POLL_INTERVAL)
     } catch {
       pollRef.current = setTimeout(poll, POLL_INTERVAL)

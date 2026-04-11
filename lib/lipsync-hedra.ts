@@ -1,5 +1,9 @@
 const HEDRA_BASE_URL = 'https://api.hedra.com/web-app/public'
 
+// Stable model IDs from Hedra docs — no need to fetch dynamically
+// Hedra Avatar: talking-head lip-sync, up to 10 minutes
+const HEDRA_AVATAR_MODEL_ID = '26f0fc66-152b-40ab-abed-76c43df99bc8'
+
 function hedraHeaders(): HeadersInit {
   return {
     'X-API-Key': process.env.HEDRA_API_KEY!,
@@ -31,29 +35,14 @@ async function uploadAsset(assetId: string, fileBuffer: Buffer, filename: string
   if (!res.ok) throw new Error(`Hedra uploadAsset failed: ${res.status} ${await res.text()}`)
 }
 
-async function getDefaultModelId(): Promise<string> {
-  const res = await fetch(`${HEDRA_BASE_URL}/models`, {
-    headers: hedraHeaders(),
-  })
-  if (!res.ok) throw new Error(`Hedra listModels failed: ${res.status} ${await res.text()}`)
-  const models = await res.json() as Array<{ id: string; name: string }>
-  // Prefer Character-3 (best quality), fall back to first available
-  const preferred = models.find((m) => m.name?.toLowerCase().includes('character-3'))
-    ?? models.find((m) => m.name?.toLowerCase().includes('avatar'))
-    ?? models[0]
-  if (!preferred) throw new Error('No Hedra models available')
-  return preferred.id
-}
-
 async function submitGeneration(params: {
-  modelId: string
   imageAssetId: string
   audioAssetId: string
   durationMs: number
 }): Promise<string> {
   const body = {
     type: 'video',
-    ai_model_id: params.modelId,
+    ai_model_id: HEDRA_AVATAR_MODEL_ID,
     start_keyframe_id: params.imageAssetId,
     audio_id: params.audioAssetId,
     generated_video_inputs: {
@@ -74,30 +63,43 @@ async function submitGeneration(params: {
   return data.id as string
 }
 
-async function pollGeneration(generationId: string, timeoutMs = 300_000): Promise<string> {
-  const start = Date.now()
-  while (Date.now() - start < timeoutMs) {
+async function pollGeneration(generationId: string): Promise<string> {
+  // Poll indefinitely — Hedra Avatar can take 10-20 min for longer clips.
+  // The pipeline runs fire-and-forget on a persistent server so there is no
+  // infrastructure timeout to worry about.
+  while (true) {
     const res = await fetch(`${HEDRA_BASE_URL}/generations/${generationId}/status`, {
       headers: hedraHeaders(),
     })
     if (!res.ok) throw new Error(`Hedra pollGeneration failed: ${res.status} ${await res.text()}`)
-    const data = await res.json() as { status: string; download_url?: string; error_message?: string }
+    const data = await res.json() as {
+      status: string
+      download_url?: string
+      progress?: number
+      eta_sec?: number
+      error_message?: string
+    }
+
+    console.log(
+      `[hedra] generation ${generationId} — status: ${data.status}` +
+      (data.progress != null ? `, progress: ${Math.round(data.progress * 100)}%` : '') +
+      (data.eta_sec != null ? `, eta: ${data.eta_sec}s` : ''),
+    )
 
     if (data.status === 'complete') {
-      if (!data.download_url) throw new Error('Hedra generation complete but no download_url')
+      if (!data.download_url) throw new Error('Hedra generation complete but no download_url returned')
       return data.download_url
     }
     if (data.status === 'error' || data.error_message) {
       throw new Error(`Hedra generation failed: ${data.error_message ?? 'unknown error'}`)
     }
 
-    await new Promise((r) => setTimeout(r, 5000))
+    await new Promise((r) => setTimeout(r, 10_000))
   }
-  throw new Error('Hedra generation timed out')
 }
 
 /**
- * Generate a lipsync video using Hedra.
+ * Generate a lipsync video using Hedra Avatar.
  * @param imageBuffer - The avatar image file buffer
  * @param imageFilename - Filename for the image (e.g. "avatar.jpg")
  * @param imageMimeType - MIME type (e.g. "image/jpeg")
@@ -112,8 +114,6 @@ export async function generateLipsyncWithHedra(
   audioBuffer: Buffer,
   audioDurationMs: number,
 ): Promise<Buffer> {
-  const modelId = await getDefaultModelId()
-
   const [imageAssetId, audioAssetId] = await Promise.all([
     createAsset('image', imageFilename),
     createAsset('audio', `audio-${Date.now()}.mp3`),
@@ -125,11 +125,12 @@ export async function generateLipsyncWithHedra(
   ])
 
   const generationId = await submitGeneration({
-    modelId,
     imageAssetId,
     audioAssetId,
     durationMs: audioDurationMs,
   })
+
+  console.log(`[hedra] submitted generation ${generationId}`)
 
   const downloadUrl = await pollGeneration(generationId)
 

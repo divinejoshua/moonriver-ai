@@ -75,6 +75,8 @@ async function generateAudio(script: string, voiceId: string): Promise<Buffer> {
 export async function runPipeline(projectId: string, project: Project): Promise<void> {
   const { script, selected_avatar, product_media_url, product_media_type, music_url } = project
 
+  const provider = (process.env.LIPSYNC_PROVIDER ?? 'veed').toLowerCase()
+
   try {
     // ── Stage: audio ──
     let audioBuffer: Buffer
@@ -100,7 +102,6 @@ export async function runPipeline(projectId: string, project: Project): Promise<
       const imageBuffer = readFileSync(imagePath)
       const imageMimeType = imageFile.endsWith('.jpeg') || imageFile.endsWith('.jpg') ? 'image/jpeg' : 'image/png'
 
-      const provider = (process.env.LIPSYNC_PROVIDER ?? 'veed').toLowerCase()
       let videoBuffer: Buffer
 
       async function runHedra(): Promise<Buffer> {
