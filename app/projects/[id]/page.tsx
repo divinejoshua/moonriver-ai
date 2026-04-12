@@ -176,10 +176,16 @@ export default function ProjectPage({
 
           <button
             onClick={handleCreateVideo}
-            disabled={!productMedia || saving}
-            title={!productMedia ? 'Upload a product image or video first' : undefined}
+            disabled={!productMedia || saving || script.length > 400}
+            title={
+              !productMedia
+                ? 'Upload a product image or video first'
+                : script.length > 400
+                ? 'Script exceeds 400 character limit'
+                : undefined
+            }
             className={`text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
-              productMedia && !saving
+              productMedia && !saving && script.length <= 400
                 ? 'bg-primary hover:bg-primary/90 cursor-pointer'
                 : 'bg-primary/40 cursor-not-allowed'
             }`}
