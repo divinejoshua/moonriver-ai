@@ -1,8 +1,17 @@
 export const AVATARS = [
-  { id: 0, name: 'Marcus', src: '/avatars/one.png' },
-  { id: 1, name: 'Sophie', src: '/avatars/two.png' },
-  { id: 2, name: 'Jade', src: '/avatars/three.png' },
-  { id: 3, name: 'Aria', src: '/avatars/four.jpeg' },
+  { id: 0, name: 'Marcus', src: '/avatars/1.jpeg' },
+  { id: 1, name: 'Sophie', src: '/avatars/2.jpeg' },
+  { id: 2, name: 'Jade', src: '/avatars/3.jpeg' },
+  { id: 3, name: 'Aria', src: '/avatars/4.jpeg' },
+  { id: 4, name: 'Liam', src: '/avatars/5.jpeg' },
+  { id: 5, name: 'Zara', src: '/avatars/6.jpeg' },
+  { id: 6, name: 'Noah', src: '/avatars/7.jpeg' },
+  { id: 7, name: 'Chloe', src: '/avatars/8.jpeg' },
+  { id: 8, name: 'Jordan', src: '/avatars/9.jpeg' },
+  { id: 9, name: 'Naomi', src: '/avatars/10.jpeg' },
+  { id: 10, name: 'Andre', src: '/avatars/11.jpeg' },
+  { id: 11, name: 'Mia', src: '/avatars/12.jpeg' },
+  { id: 12, name: 'Elena', src: '/avatars/13.jpeg' },
 ] as const
 
 export const AVATAR_VOICE_MAP: Record<number, string> = {
