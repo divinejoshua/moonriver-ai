@@ -181,14 +181,13 @@ export default function ProjectPage({
               !productMedia
                 ? 'Upload a product image or video first'
                 : script.length > 400
-                ? 'Script exceeds 400 character limit'
-                : undefined
+                  ? 'Script exceeds 400 character limit'
+                  : undefined
             }
-            className={`text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
-              productMedia && !saving && script.length <= 400
-                ? 'bg-primary hover:bg-primary/90 cursor-pointer'
-                : 'bg-primary/40 cursor-not-allowed'
-            }`}
+            className={`text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${productMedia && !saving && script.length <= 400
+              ? 'bg-primary hover:bg-primary/90 cursor-pointer'
+              : 'bg-primary/40 cursor-not-allowed'
+              }`}
           >
             {saving ? 'Saving…' : 'Create Video'}
           </button>
@@ -213,7 +212,7 @@ export default function ProjectPage({
                   </span>
                   <button
                     onClick={handleRegenerate}
-                    className="text-xs text-primary hover:text-primary/80 transition-colors"
+                    className="text-xs text-primary hover:text-primary/80 transition-colors cursor-pointer"
                   >
                     Regenerate
                   </button>
@@ -224,8 +223,13 @@ export default function ProjectPage({
                 onChange={(e) => setScript(e.target.value)}
                 maxLength={400}
                 rows={9}
-                className="w-full bg-card border border-border rounded-xl px-4 py-3 text-foreground text-sm leading-relaxed focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring resize-none placeholder:text-muted-foreground shadow-sm"
+                className={`w-full bg-card border rounded-xl px-4 py-3 text-foreground text-sm leading-relaxed focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring resize-none placeholder:text-muted-foreground shadow-sm ${script.length > 400 ? 'border-destructive' : 'border-border'}`}
               />
+              {script.length > 400 && (
+                <p className="text-xs text-destructive">
+                  Script is {script.length - 400} character{script.length - 400 !== 1 ? 's' : ''} over the limit. Shorten it to create your video.
+                </p>
+              )}
             </section>
 
             {/* Background Music */}
@@ -245,11 +249,10 @@ export default function ProjectPage({
                   <>
                     <button
                       onClick={() => { setSelectedMusic('none'); setMusicExpanded(false) }}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all ${
-                        selectedMusic === 'none'
-                          ? 'bg-accent border-primary/50 ring-1 ring-ring'
-                          : 'bg-card border-border hover:border-ring/50'
-                      }`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all ${selectedMusic === 'none'
+                        ? 'bg-accent border-primary/50 ring-1 ring-ring'
+                        : 'bg-card border-border hover:border-ring/50'
+                        }`}
                     >
                       <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
                         <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,11 +273,10 @@ export default function ProjectPage({
                         <div
                           key={track.url}
                           onClick={() => { setSelectedMusic(track.url); setMusicExpanded(false) }}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-accent border-primary/50 ring-1 ring-ring'
-                              : 'bg-card border-border hover:border-ring/50'
-                          }`}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm transition-all cursor-pointer ${isSelected
+                            ? 'bg-accent border-primary/50 ring-1 ring-ring'
+                            : 'bg-card border-border hover:border-ring/50'
+                            }`}
                         >
                           <button
                             onClick={(e) => { e.stopPropagation(); togglePlay(track.url) }}
@@ -351,9 +353,8 @@ export default function ProjectPage({
                   <button
                     key={avatar.id}
                     onClick={() => setSelectedAvatar(avatar.id)}
-                    className={`flex flex-col items-center gap-2 py-3 px-4 rounded-xl transition-all ${
-                      selectedAvatar === avatar.id ? 'bg-accent ring-2 ring-primary' : 'hover:bg-muted'
-                    }`}
+                    className={`flex flex-col items-center cursor-pointer gap-2 py-3 px-4 rounded-xl transition-all ${selectedAvatar === avatar.id ? 'bg-accent ring-2 ring-primary' : 'hover:bg-muted'
+                      }`}
                   >
                     <div className="w-16 h-20 rounded-xl overflow-hidden shadow-md">
                       <Image
@@ -372,6 +373,11 @@ export default function ProjectPage({
 
             {/* Product media */}
             <ProductMedia value={productMedia} onChange={setProductMedia} />
+            {!productMedia && (
+              <p className="text-xs text-destructive -mt-4">
+                A product image or video is required to create your video.
+              </p>
+            )}
           </div>
 
           {/* Right: Preview */}
