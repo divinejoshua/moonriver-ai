@@ -188,7 +188,7 @@ export default function GeneratingPage({
                 </div>
                 <div>
                   <p className="text-sm font-medium text-foreground">Final Video</p>
-                  <p className="text-xs text-muted-foreground">Product media + {avatar.name} · Ready to post</p>
+                  <p className="text-xs text-muted-foreground">Product media · Ready to post</p>
                 </div>
                 <button
                   onClick={() => {
@@ -234,7 +234,7 @@ export default function GeneratingPage({
 
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium ${stage.status === 'pending' ? 'text-muted-foreground' :
-                      stage.status === 'error' ? 'text-destructive' : 'text-foreground'
+                    stage.status === 'error' ? 'text-destructive' : 'text-foreground'
                     }`}>
                     {stage.label}
                   </p>
