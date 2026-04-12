@@ -34,6 +34,7 @@ export default function ProjectPage({
   const [playingTrack, setPlayingTrack] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [productMedia, setProductMedia] = useState<ProductMediaValue>(null)
+  const [avatarOverlayOpen, setAvatarOverlayOpen] = useState(false)
 
   useEffect(() => {
     fetch(`/api/projects/${id}`)
@@ -352,29 +353,88 @@ export default function ProjectPage({
 
             {/* Avatar selection */}
             <section className="space-y-3">
-              <label className="text-sm font-medium text-foreground">Avatar</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-foreground">Avatar</label>
+                <button
+                  onClick={() => setAvatarOverlayOpen(true)}
+                  className="text-xs text-primary hover:text-primary/80 transition-colors cursor-pointer"
+                >
+                  View more
+                </button>
+              </div>
               <div className="flex gap-3">
-                {AVATARS.map((avatar) => (
-                  <button
-                    key={avatar.id}
-                    onClick={() => setSelectedAvatar(avatar.id)}
-                    className={`flex flex-col items-center cursor-pointer gap-2 py-3 px-4 rounded-xl transition-all ${selectedAvatar === avatar.id ? 'bg-accent ring-2 ring-primary' : 'hover:bg-muted'
-                      }`}
-                  >
-                    <div className="w-16 h-20 rounded-xl overflow-hidden shadow-md">
-                      <Image
-                        src={avatar.src}
-                        alt={avatar.name}
-                        width={64}
-                        height={80}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <span className="text-xs text-muted-foreground font-medium">{avatar.name}</span>
-                  </button>
-                ))}
+                {[
+                  ...AVATARS.filter((a) => a.id === selectedAvatar),
+                  ...AVATARS.filter((a) => a.id !== selectedAvatar),
+                ]
+                  .slice(0, 4)
+                  .map((avatar) => (
+                    <button
+                      key={avatar.id}
+                      onClick={() => setSelectedAvatar(avatar.id)}
+                      className={`flex flex-col items-center cursor-pointer gap-2 py-3 px-4 rounded-xl transition-all ${selectedAvatar === avatar.id ? 'bg-accent ring-2 ring-primary' : 'hover:bg-muted'}`}
+                    >
+                      <div className="w-16 h-20 rounded-xl overflow-hidden shadow-md">
+                        <Image
+                          src={avatar.src}
+                          alt={avatar.name}
+                          width={64}
+                          height={80}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <span className="text-xs text-muted-foreground font-medium">{avatar.name}</span>
+                    </button>
+                  ))}
               </div>
             </section>
+
+            {/* Avatar overlay */}
+            {avatarOverlayOpen && (
+              <div
+                className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60"
+                onClick={() => setAvatarOverlayOpen(false)}
+              >
+                <div
+                  className="bg-card border border-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[80vh] flex flex-col"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
+                    <h3 className="text-sm font-semibold text-foreground">Choose an Avatar</h3>
+                    <button
+                      onClick={() => setAvatarOverlayOpen(false)}
+                      className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="overflow-y-auto p-5">
+                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                      {AVATARS.map((avatar) => (
+                        <button
+                          key={avatar.id}
+                          onClick={() => { setSelectedAvatar(avatar.id); setAvatarOverlayOpen(false) }}
+                          className={`flex flex-col items-center cursor-pointer gap-2 py-3 px-2 rounded-xl transition-all ${selectedAvatar === avatar.id ? 'bg-accent ring-2 ring-primary' : 'hover:bg-muted'}`}
+                        >
+                          <div className="w-full aspect-[4/5] rounded-xl overflow-hidden shadow-md">
+                            <Image
+                              src={avatar.src}
+                              alt={avatar.name}
+                              width={80}
+                              height={100}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <span className="text-xs text-muted-foreground font-medium">{avatar.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Product media */}
             <ProductMedia value={productMedia} onChange={setProductMedia} />
