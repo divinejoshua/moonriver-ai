@@ -353,15 +353,7 @@ export default function ProjectPage({
 
             {/* Avatar selection */}
             <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground">Avatar</label>
-                <button
-                  onClick={() => setAvatarOverlayOpen(true)}
-                  className="text-xs text-primary hover:text-primary/80 transition-colors cursor-pointer"
-                >
-                  View more
-                </button>
-              </div>
+              <label className="text-sm font-medium text-foreground">Avatar</label>
               <div className="flex gap-3">
                 {[
                   ...AVATARS.filter((a) => a.id === selectedAvatar),
@@ -386,6 +378,17 @@ export default function ProjectPage({
                       <span className="text-xs text-muted-foreground font-medium">{avatar.name}</span>
                     </button>
                   ))}
+                <button
+                  onClick={() => setAvatarOverlayOpen(true)}
+                  className="flex flex-col items-center cursor-pointer gap-2 py-3 px-4 rounded-xl hover:bg-muted transition-all"
+                >
+                  <div className="w-16 h-20 rounded-xl bg-muted flex items-center justify-center shadow-md">
+                    <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </div>
+                  <span className="text-xs text-muted-foreground font-medium">View more</span>
+                </button>
               </div>
             </section>
 
