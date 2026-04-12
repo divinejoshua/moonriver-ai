@@ -15,8 +15,17 @@ export const AVATARS = [
 ] as const
 
 export const AVATAR_VOICE_MAP: Record<number, string> = {
-  0: 'rdDUoCO1RjwdMmNjmhHV',
-  1: 'kXsOSDWolD7e9l1Z0sbH',
-  2: 'dMyQqiVXTU80dDl2eNK8',
-  3: 'BuaKXS4Sv1Mccaw3flfU',
+  0: 'rdDUoCO1RjwdMmNjmhHV',  // Marcus (M)
+  1: 'kXsOSDWolD7e9l1Z0sbH',  // Sophie (F)
+  2: 'dMyQqiVXTU80dDl2eNK8',  // Jade (F)
+  3: 'BuaKXS4Sv1Mccaw3flfU',  // Aria (F)
+  4: 'rdDUoCO1RjwdMmNjmhHV',  // Liam (M)
+  5: 'kXsOSDWolD7e9l1Z0sbH',  // Zara (F)
+  6: 'rdDUoCO1RjwdMmNjmhHV',  // Noah (M)
+  7: 'dMyQqiVXTU80dDl2eNK8',  // Chloe (F)
+  8: 'rdDUoCO1RjwdMmNjmhHV',  // Jordan (M)
+  9: 'BuaKXS4Sv1Mccaw3flfU',  // Naomi (F)
+  10: 'rdDUoCO1RjwdMmNjmhHV', // Andre (M)
+  11: 'kXsOSDWolD7e9l1Z0sbH', // Mia (F)
+  12: 'dMyQqiVXTU80dDl2eNK8', // Elena (F)
 }
