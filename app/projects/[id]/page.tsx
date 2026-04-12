@@ -22,6 +22,7 @@ export default function ProjectPage({
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Editor state — populated from project on load
@@ -83,6 +84,7 @@ export default function ProjectPage({
   async function handleRegenerate() {
     if (!project?.url) return
     setError(null)
+    setRegenerating(true)
     try {
       const res = await fetch('/api/generate-script', {
         method: 'POST',
@@ -94,6 +96,8 @@ export default function ProjectPage({
       setScript(data.script)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setRegenerating(false)
     }
   }
 
@@ -212,9 +216,10 @@ export default function ProjectPage({
                   </span>
                   <button
                     onClick={handleRegenerate}
-                    className="text-xs text-primary hover:text-primary/80 transition-colors cursor-pointer"
+                    disabled={regenerating}
+                    className="text-xs text-primary hover:text-primary/80 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Regenerate
+                    {regenerating ? 'Loading…' : 'Regenerate'}
                   </button>
                 </div>
               </div>
