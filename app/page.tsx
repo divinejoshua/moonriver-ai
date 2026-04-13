@@ -101,7 +101,6 @@ export default function Home() {
       .then((data) => {
         if (data.error) return
         setUsage(data)
-        if (justLoggedIn && !data.paid && !data.isAdmin && data.used >= data.limit) router.replace('/pricing')
       })
       .catch(() => { })
   }, [isLoaded, isSignedIn])
@@ -183,13 +182,8 @@ export default function Home() {
         }),
       })
       const projectData = await projectRes.json()
-      if (projectRes.status === 403 && projectData.limitReached) {
-        router.push('/pricing')
-        return
-      }
       if (!projectRes.ok) throw new Error(projectData.error ?? 'Failed to create project')
 
-      setUsage((prev) => prev && !prev.isAdmin ? { ...prev, used: prev.used + 1 } : prev)
       router.push(`/projects/${projectData.id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -303,7 +297,7 @@ export default function Home() {
                 <p className="text-xs text-muted-foreground">
                   Works with Shopify, Amazon, landing pages, and more
                 </p>
-                {usage && !usage.isAdmin && (
+                {usage && !usage.isAdmin && usage.paid && (
                   <div className="flex items-center gap-2">
                     <div className="w-24 h-1 rounded-full bg-border overflow-hidden">
                       <div

@@ -3,7 +3,7 @@
 import { use, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { UserButton } from '@clerk/nextjs'
+import { UserButton, PricingTable } from '@clerk/nextjs'
 import Header from '@/app/components/Header'
 import VideoPreview from '@/app/components/VideoPreview'
 import ProductMedia, { type ProductMediaValue } from '@/app/components/ProductMedia'
@@ -35,6 +35,8 @@ export default function ProjectPage({
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [productMedia, setProductMedia] = useState<ProductMediaValue>(null)
   const [avatarOverlayOpen, setAvatarOverlayOpen] = useState(false)
+  const [pricingOpen, setPricingOpen] = useState(false)
+  const [isPaid, setIsPaid] = useState<boolean | null>(null)
 
   useEffect(() => {
     fetch(`/api/projects/${id}`)
@@ -56,6 +58,13 @@ export default function ProjectPage({
       })
       .catch(() => router.replace('/'))
   }, [id, router])
+
+  useEffect(() => {
+    fetch('/api/usage')
+      .then((r) => r.json())
+      .then((data) => { if (!data.error) setIsPaid(data.paid || data.isAdmin) })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -104,6 +113,7 @@ export default function ProjectPage({
 
   async function handleCreateVideo() {
     if (!productMedia) return
+    if (!isPaid) { setPricingOpen(true); return }
     stopAudio()
     setSaving(true)
     setError(null)
@@ -134,6 +144,7 @@ export default function ProjectPage({
       const genRes = await fetch(`/api/projects/${id}/generate`, { method: 'POST' })
       if (!genRes.ok) {
         const data = await genRes.json()
+        if (data.notPaid || data.limitReached) { setPricingOpen(true); setSaving(false); return }
         throw new Error(data.error ?? 'Failed to start generation')
       }
 
@@ -434,6 +445,34 @@ export default function ProjectPage({
                         </button>
                       ))}
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Pricing overlay */}
+            {pricingOpen && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+                onClick={() => setPricingOpen(false)}
+              >
+                <div
+                  className="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
+                    <h3 className="text-sm font-semibold text-foreground">Upgrade to create videos</h3>
+                    <button
+                      onClick={() => setPricingOpen(false)}
+                      className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="overflow-y-auto p-5">
+                    <PricingTable />
                   </div>
                 </div>
               </div>
