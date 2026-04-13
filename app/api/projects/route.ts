@@ -60,8 +60,8 @@ export async function POST(req: Request) {
 
     let effectiveLimit: number
     if (hasGrowth) effectiveLimit = 25
-    else if (hasBasic) effectiveLimit = 10
-    else if (paidCount > 0) effectiveLimit = paidCount * 10
+    else if (hasBasic) effectiveLimit = 5
+    else if (paidCount > 0) effectiveLimit = paidCount * 5
     else effectiveLimit = 1
 
     const { count } = await supabase

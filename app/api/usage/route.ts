@@ -24,10 +24,10 @@ export async function GET() {
     limit = 25
     isPaid = true
   } else if (hasBasic) {
-    limit = 10
+    limit = 5
     isPaid = true
   } else if (paidCount > 0) {
-    limit = paidCount * 10
+    limit = paidCount * 5
     isPaid = true
   } else {
     limit = 1
