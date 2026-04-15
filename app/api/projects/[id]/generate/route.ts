@@ -9,6 +9,8 @@ export async function POST(
   const { userId, has } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { id } = await params
+
   // Check subscription and enforce limits
   const clerk = await clerkClient()
   const clerkUser = await clerk.users.getUser(userId)
@@ -18,30 +20,39 @@ export async function POST(
     const hasGrowth = has({ plan: 'growth' })
     const hasBasic = has({ plan: 'basic' })
     const paidCount = (clerkUser.publicMetadata?.paidCount as number) ?? 0
+    const isFree = !hasGrowth && !hasBasic && paidCount === 0
 
-    if (!hasGrowth && !hasBasic && paidCount === 0) {
-      return Response.json({ error: 'Subscription required', notPaid: true }, { status: 403 })
-    }
+    if (isFree) {
+      // Free users get one video. If they've already generated another project, require a subscription.
+      const { count: prevGenerated } = await supabase
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .neq('id', id)
+        .neq('status', 'draft')
 
-    let effectiveLimit: number
-    if (hasGrowth) effectiveLimit = 25
-    else if (hasBasic) effectiveLimit = 5
-    else effectiveLimit = paidCount * 5
+      if ((prevGenerated ?? 0) >= 1) {
+        return Response.json({ error: 'Subscription required', notPaid: true }, { status: 403 })
+      }
+    } else {
+      let effectiveLimit: number
+      if (hasGrowth) effectiveLimit = 25
+      else if (hasBasic) effectiveLimit = 5
+      else effectiveLimit = paidCount * 5
 
-    const { count } = await supabase
-      .from('projects')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId)
+      const { count } = await supabase
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
 
-    if ((count ?? 0) > effectiveLimit) {
-      return Response.json(
-        { error: `You've reached your ${effectiveLimit} video limit.`, limitReached: true },
-        { status: 403 },
-      )
+      if ((count ?? 0) > effectiveLimit) {
+        return Response.json(
+          { error: `You've reached your ${effectiveLimit} video limit.`, limitReached: true },
+          { status: 403 },
+        )
+      }
     }
   }
-
-  const { id } = await params
 
   const { data: project, error } = await supabase
     .from('projects')

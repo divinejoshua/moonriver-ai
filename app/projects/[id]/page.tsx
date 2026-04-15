@@ -36,7 +36,6 @@ export default function ProjectPage({
   const [productMedia, setProductMedia] = useState<ProductMediaValue>(null)
   const [avatarOverlayOpen, setAvatarOverlayOpen] = useState(false)
   const [pricingOpen, setPricingOpen] = useState(false)
-  const [isPaid, setIsPaid] = useState<boolean | null>(null)
 
   useEffect(() => {
     fetch(`/api/projects/${id}`)
@@ -58,13 +57,6 @@ export default function ProjectPage({
       })
       .catch(() => router.replace('/'))
   }, [id, router])
-
-  useEffect(() => {
-    fetch('/api/usage')
-      .then((r) => r.json())
-      .then((data) => { if (!data.error) setIsPaid(data.paid || data.isAdmin) })
-      .catch(() => {})
-  }, [])
 
   useEffect(() => {
     return () => {
@@ -113,7 +105,6 @@ export default function ProjectPage({
 
   async function handleCreateVideo() {
     if (!productMedia) return
-    if (!isPaid) { setPricingOpen(true); return }
     stopAudio()
     setSaving(true)
     setError(null)
@@ -461,7 +452,7 @@ export default function ProjectPage({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-                    <h3 className="text-sm font-semibold text-foreground">Upgrade to create videos</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Upgrade to create more videos</h3>
                     <button
                       onClick={() => setPricingOpen(false)}
                       className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
