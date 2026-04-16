@@ -1,7 +1,7 @@
-import OpenAI from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextRequest } from 'next/server'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 const HOOKS = [
   `"This tool just made [job role] completely obsolete."`,
@@ -164,18 +164,13 @@ ${pageText}
 
 Now write a UGC reel script for this product following the system instructions exactly.`
 
-  const response = await openai.responses.create({
-    model: 'gpt-5.4-mini',
-    instructions: buildSystemPrompt(),
-    input: userPrompt,
+  const model = genai.getGenerativeModel({
+    model: 'gemini-2.5-flash',
+    systemInstruction: buildSystemPrompt(),
   })
 
-  const text = response.output
-    .filter((item) => item.type === 'message')
-    .flatMap((item) => (item.type === 'message' ? item.content : []))
-    .filter((c) => c.type === 'output_text')
-    .map((c) => (c.type === 'output_text' ? c.text : ''))
-    .join('')
+  const result = await model.generateContent(userPrompt)
+  const text = result.response.text()
 
   return Response.json({ script: text })
 }
