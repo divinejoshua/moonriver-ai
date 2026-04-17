@@ -155,7 +155,7 @@ export default function HistoryPage() {
                       {project.status === 'done' && project.final_video_url && (
                         <button
                           onClick={() => downloadVideo(project.final_video_url!)}
-                          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
                         >
                           Download
                         </button>
@@ -166,7 +166,7 @@ export default function HistoryPage() {
                             ? `/projects/${project.id}/generating`
                             : `/projects/${project.id}`
                         )}
-                        className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors ml-auto"
+                        className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors ml-auto cursor-pointer"
                       >
                         {project.status === 'done' ? 'View' : 'Open'}
                       </button>
