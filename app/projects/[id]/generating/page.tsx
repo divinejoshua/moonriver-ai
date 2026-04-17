@@ -2,6 +2,7 @@
 
 import { use, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { UserButton } from '@clerk/nextjs'
 import Header from '@/app/components/Header'
 import type { Project } from '@/lib/supabase'
@@ -202,6 +203,31 @@ export default function GeneratingPage({
                 </button>
               </div>
               <video controls src={finalVideoUrl} className="w-48 rounded-xl mx-auto block border" />
+            </div>
+          )}
+
+          {/* Action buttons */}
+          {finalVideoUrl && (
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => {
+                  const a = document.createElement('a')
+                  a.href = `/api/download?url=${encodeURIComponent(finalVideoUrl)}&filename=moonriver_ugc.mp4`
+                  a.click()
+                }}
+                className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                </svg>
+                Download video
+              </button>
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl border border-border bg-card text-foreground text-sm font-medium hover:bg-accent transition-colors"
+              >
+                Create another video
+              </Link>
             </div>
           )}
 
