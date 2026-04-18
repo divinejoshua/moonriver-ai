@@ -194,7 +194,7 @@ export default function GeneratingPage({
                 <button
                   onClick={() => {
                     const a = document.createElement('a')
-                    a.href = `/api/download?url=${encodeURIComponent(finalVideoUrl)}&filename=moonriver_ugc.mp4`
+                    a.href = `/api/download?url=${encodeURIComponent(finalVideoUrl)}&filename=iloveugc_video.mp4`
                     a.click()
                   }}
                   className="ml-auto text-xs font-medium text-primary hover:text-primary/80 transition-colors"
@@ -212,7 +212,7 @@ export default function GeneratingPage({
               <button
                 onClick={() => {
                   const a = document.createElement('a')
-                  a.href = `/api/download?url=${encodeURIComponent(finalVideoUrl)}&filename=moonriver_ugc.mp4`
+                  a.href = `/api/download?url=${encodeURIComponent(finalVideoUrl)}&filename=iloveugc_video.mp4`
                   a.click()
                 }}
                 className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"

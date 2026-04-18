@@ -37,7 +37,7 @@ function StatusBadge({ status }: { status: ProjectSummary['status'] }) {
 
 function downloadVideo(url: string) {
   const a = document.createElement('a')
-  a.href = `/api/download?url=${encodeURIComponent(url)}&filename=moonriver_ugc.mp4`
+  a.href = `/api/download?url=${encodeURIComponent(url)}&filename=iloveugc_video.mp4`
   a.click()
 }
 

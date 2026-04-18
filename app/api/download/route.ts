@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   const res = await fetch(url)
   if (!res.ok) return Response.json({ error: 'Failed to fetch file' }, { status: 502 })
 
-  const filename = searchParams.get('filename') ?? 'moonriver_ugc.mp4'
+  const filename = searchParams.get('filename') ?? 'iloveugc_video.mp4'
 
   return new Response(res.body, {
     headers: {
