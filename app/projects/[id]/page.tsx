@@ -182,15 +182,15 @@ export default function ProjectPage({
 
           <button
             onClick={handleCreateVideo}
-            disabled={!productMedia || saving || script.length > 400}
+            disabled={!productMedia || saving || script.length > 500}
             title={
               !productMedia
                 ? 'Upload a product image or video first'
-                : script.length > 400
-                  ? 'Script exceeds 400 character limit'
+                : script.length > 500
+                  ? 'Script exceeds 500 character limit'
                   : undefined
             }
-            className={`text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${productMedia && !saving && script.length <= 400
+            className={`text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${productMedia && !saving && script.length <= 500
               ? 'bg-primary hover:bg-primary/90 cursor-pointer'
               : 'bg-primary/40 cursor-not-allowed'
               }`}
@@ -213,8 +213,8 @@ export default function ProjectPage({
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground">Voiceover Script</label>
                 <div className="flex items-center gap-3">
-                  <span className={`text-xs tabular-nums ${script.length > 400 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                    {script.length}/400
+                  <span className={`text-xs tabular-nums ${script.length > 500 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    {script.length}/500
                   </span>
                   <button
                     onClick={handleRegenerate}
@@ -228,13 +228,13 @@ export default function ProjectPage({
               <textarea
                 value={script}
                 onChange={(e) => setScript(e.target.value)}
-                maxLength={400}
+                maxLength={500}
                 rows={9}
-                className={`w-full bg-card border rounded-xl px-4 py-3 text-foreground text-sm leading-relaxed focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring resize-none placeholder:text-muted-foreground shadow-sm ${script.length > 400 ? 'border-destructive' : 'border-border'}`}
+                className={`w-full bg-card border rounded-xl px-4 py-3 text-foreground text-sm leading-relaxed focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring resize-none placeholder:text-muted-foreground shadow-sm ${script.length > 500 ? 'border-destructive' : 'border-border'}`}
               />
-              {script.length > 400 && (
+              {script.length > 500 && (
                 <p className="text-xs text-destructive">
-                  Script is {script.length - 400} character{script.length - 400 !== 1 ? 's' : ''} over the limit. Shorten it to create your video.
+                  Script is {script.length - 500} character{script.length - 500 !== 1 ? 's' : ''} over the limit. Shorten it to create your video.
                 </p>
               )}
             </section>
