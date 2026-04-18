@@ -69,6 +69,11 @@ export async function POST(
     return Response.json({ error: 'Project is missing required fields' }, { status: 400 })
   }
 
+  await supabase
+    .from('projects')
+    .update({ status: 'generating', updated_at: new Date().toISOString() })
+    .eq('id', id)
+
   // Fire and forget — Railway's persistent server keeps the event loop alive
   void runPipeline(id, project)
 

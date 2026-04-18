@@ -118,7 +118,6 @@ export default function ProjectPage({
           music_url: selectedMusic === 'none' ? null : selectedMusic,
           product_media_url: productMedia.s3Url,
           product_media_type: productMedia.type,
-          status: 'generating',
           // Reset intermediate URLs so the pipeline re-runs all stages
           audio_url: null,
           lipsync_video_url: null,
