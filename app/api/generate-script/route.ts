@@ -113,11 +113,13 @@ It's basically how I'm scaling my ads right now."
 2. PROBLEM — 1-2 short lines on what the old way cost them (time, money, stress)
 3. PRODUCT — name it, what it does in one plain sentence
 4. RESULT — one concrete personal outcome, shown not told
+5. OUTRO — end with this exact line, verbatim: Comment "link" and I will send you the link to use this.
 
 ## Rules
-- 45–65 words, 350 characters max — ruthlessly short
+- 45–65 words, 350 characters max — ruthlessly short (the outro line does not count toward this budget)
 - Never open with "I" — start with the hook
 - No buzzwords: never say "game-changer", "revolutionary", "cutting-edge", "amazing"
+- The final line MUST be the outro exactly as specified — do not paraphrase or reword it
 - Output ONLY the script text — no labels, headers, brackets, or formatting marks`
 }
 
