@@ -38,7 +38,7 @@ const HOOKS = [
   `"Can AI actually replace [task]? I tested it so you don't have to."`,
   `"Are you still doing [task] the slow way? Let me fix that."`,
   `"What if I told you this whole thing is completely free?"`,
-  `"This is the best [category] tool I have ever used. Full stop."`,
+  `"This is the best [category] tool I have ever used."`,
   `"This single tool replaced three subscriptions for me."`,
   `"If you only add one tool to your stack this year, make it this one."`,
   `"I've tested dozens of [category] tools. Nothing comes close to this."`,
