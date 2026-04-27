@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth, useClerk, SignInButton, UserButton } from '@clerk/nextjs'
+import { useAuth, useClerk, useUser, SignInButton, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import Header from './components/Header'
 import OnboardingSurveyModal from './components/OnboardingSurveyModal'
@@ -75,6 +75,7 @@ const FAQ_LD_JSON = {
 export default function Home() {
   const router = useRouter()
   const { isSignedIn, isLoaded } = useAuth()
+  const { user, isLoaded: isUserLoaded } = useUser()
   const { openSignIn } = useClerk()
   const [step, setStep] = useState<Step>('input')
   const [url, setUrl] = useState('')
@@ -116,6 +117,14 @@ export default function Home() {
       return
     }
 
+    if (isUserLoaded && user?.publicMetadata?.onboardingSurveyCompleted === true) {
+      setSurveyStatus('complete')
+      setSurveyError(null)
+      return
+    }
+
+    if (!isUserLoaded) return
+
     setSurveyStatus('loading')
     fetch('/api/onboarding-survey')
       .then((response) => response.json())
@@ -127,7 +136,7 @@ export default function Home() {
         setSurveyError(err instanceof Error ? err.message : 'Failed to load onboarding form')
         setSurveyStatus('incomplete')
       })
-  }, [isLoaded, isSignedIn])
+  }, [isLoaded, isSignedIn, isUserLoaded, user])
 
   // Auto-generate after sign-in if the user had typed a URL and has paid
   useEffect(() => {

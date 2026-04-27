@@ -14,9 +14,9 @@ const HEARD_FROM_OPTIONS = [
 ] as const
 
 const UGC_TYPE_OPTIONS = [
-  'Videos for my Software startup',
+  'Videos for my software startup',
   'Videos for my ecommerce brand',
-  'Generic Lifestyle videos',
+  'Generic lifestyle videos',
   'Others',
 ] as const
 
@@ -25,6 +25,7 @@ const ROLE_OPTIONS = [
   'Growth Marketer',
   'Software Engineer',
   'Product / Project Manager',
+  'Other',
 ] as const
 
 const TEAM_SIZE_OPTIONS = [

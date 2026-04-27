@@ -145,8 +145,10 @@ async function ensureSurveySheet(spreadsheetId: string, sheetTitle: string) {
 }
 
 export async function appendSurveySubmission(submission: SurveySubmission) {
-  const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID_MOONRIVER_EMAIL ?? DEFAULT_SPREADSHEET_ID
-  const sheetTitle = process.env.GOOGLE_SHEETS_SURVEY_SHEET_NAME_MOONRIVER_EMAIL ?? DEFAULT_SHEET_TITLE
+  const spreadsheetId: string =
+    process.env.GOOGLE_SHEETS_SPREADSHEET_ID_MOONRIVER_EMAIL ?? DEFAULT_SPREADSHEET_ID
+  const sheetTitle: string =
+    process.env.GOOGLE_SHEETS_SURVEY_SHEET_NAME_MOONRIVER_EMAIL ?? DEFAULT_SHEET_TITLE
 
   await ensureSurveySheet(spreadsheetId, sheetTitle)
 

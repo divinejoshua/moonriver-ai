@@ -125,7 +125,6 @@ export default function OnboardingSurveyModal({
               <p className="text-sm font-medium text-muted-foreground">
                 Step {step + 1} / {QUESTIONS.length}
               </p>
-              <h2 className="mt-1 text-xl font-semibold text-foreground">Tell us about your team</h2>
             </div>
             <div className="h-2 w-28 overflow-hidden rounded-full bg-muted">
               <div
