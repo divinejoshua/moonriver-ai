@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth, useClerk, SignInButton, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import Header from './components/Header'
+import OnboardingSurveyModal from './components/OnboardingSurveyModal'
 import ProofVideos from './components/ProofVideos'
 import Footer from './components/Footer'
 
@@ -81,6 +82,9 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [usage, setUsage] = useState<{ used: number; limit: number; isAdmin: boolean; paid: boolean } | null>(null)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [surveyStatus, setSurveyStatus] = useState<'idle' | 'loading' | 'incomplete' | 'complete'>('idle')
+  const [surveyError, setSurveyError] = useState<string | null>(null)
+  const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false)
   const didAutoGenerate = useRef(false)
   const wasSignedIn = useRef<boolean | null>(null)
 
@@ -93,7 +97,6 @@ export default function Home() {
   // Fetch usage once signed in; redirect to /pay only if user just logged in
   useEffect(() => {
     if (!isLoaded) return
-    const justLoggedIn = wasSignedIn.current === false && isSignedIn === true
     wasSignedIn.current = isSignedIn ?? false
     if (!isSignedIn) return
     fetch('/api/usage')
@@ -105,9 +108,30 @@ export default function Home() {
       .catch(() => { })
   }, [isLoaded, isSignedIn])
 
+  useEffect(() => {
+    if (!isLoaded) return
+    if (!isSignedIn) {
+      setSurveyStatus('complete')
+      setSurveyError(null)
+      return
+    }
+
+    setSurveyStatus('loading')
+    fetch('/api/onboarding-survey')
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) throw new Error(data.error)
+        setSurveyStatus(data.completed ? 'complete' : 'incomplete')
+      })
+      .catch((err) => {
+        setSurveyError(err instanceof Error ? err.message : 'Failed to load onboarding form')
+        setSurveyStatus('incomplete')
+      })
+  }, [isLoaded, isSignedIn])
+
   // Auto-generate after sign-in if the user had typed a URL and has paid
   useEffect(() => {
-    if (!isLoaded || !isSignedIn || !usage || didAutoGenerate.current) return
+    if (!isLoaded || !isSignedIn || !usage || surveyStatus !== 'complete' || didAutoGenerate.current) return
     const pending = sessionStorage.getItem(PENDING_URL_KEY)
     if (!pending) return
     didAutoGenerate.current = true
@@ -115,7 +139,7 @@ export default function Home() {
     setUrl(pending)
     handleGenerate(pending)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, isSignedIn, usage])
+  }, [isLoaded, isSignedIn, usage, surveyStatus])
 
   const URL_REGEX = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/
 
@@ -144,6 +168,31 @@ export default function Home() {
     const stripped = stripProtocol(url)
     if (!validateUrl(stripped)) return
     sessionStorage.setItem(PENDING_URL_KEY, stripped)
+  }
+
+  async function handleSurveySubmit(values: {
+    heardFrom: string
+    ugcType: string
+    role: string
+    teamSize: string
+  }) {
+    setIsSubmittingSurvey(true)
+    setSurveyError(null)
+
+    try {
+      const response = await fetch('/api/onboarding-survey', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error ?? 'Failed to save survey')
+      setSurveyStatus('complete')
+    } catch (err) {
+      setSurveyError(err instanceof Error ? err.message : 'Failed to save survey')
+    } finally {
+      setIsSubmittingSurvey(false)
+    }
   }
 
   async function handleGenerate(urlOverride?: string) {
@@ -366,7 +415,7 @@ export default function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {TESTIMONIALS.map(({ name, role, initials, body }) => (
                   <div key={name} className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-4">
-                    <p className="text-foreground text-sm leading-relaxed flex-1">"{body}"</p>
+                    <p className="text-foreground text-sm leading-relaxed flex-1">&ldquo;{body}&rdquo;</p>
                     <div className="flex items-center gap-3 pt-3 border-t border-border">
                       <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
                         {initials}
@@ -447,6 +496,23 @@ export default function Home() {
             <p className="text-muted-foreground text-sm">Scraping product page and writing your script</p>
           </div>
         </div>
+      )}
+
+      {isLoaded && isSignedIn && surveyStatus === 'loading' && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-4 shadow-lg">
+            <div className="h-5 w-5 rounded-full border-2 border-border border-t-primary animate-spin" />
+            <p className="text-sm text-foreground">Loading onboarding form...</p>
+          </div>
+        </div>
+      )}
+
+      {isLoaded && isSignedIn && surveyStatus === 'incomplete' && (
+        <OnboardingSurveyModal
+          error={surveyError}
+          isLoading={isSubmittingSurvey}
+          onSubmit={handleSurveySubmit}
+        />
       )}
     </div>
   )
