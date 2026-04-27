@@ -1,5 +1,7 @@
 'use client'
 
+import { useMemo, useState } from 'react'
+
 type SurveyFormValues = {
   heardFrom: string
   ugcType: string
@@ -13,69 +15,65 @@ type OnboardingSurveyModalProps = {
   onSubmit: (values: SurveyFormValues) => Promise<void>
 }
 
-const HEARD_FROM_OPTIONS = [
-  'Instagram',
-  'Tiktok',
-  'Reddit',
-  'Youtube',
-  'X (formerly Twitter)',
-  'Search Engine',
-  'AI recommendation',
-  'A friend',
-  'Other',
-]
-
-const UGC_TYPE_OPTIONS = [
-  'Videos for my software startup',
-  'Videos for my ecommerce brand',
-  'Generic lifestyle videos',
-  'Others',
-]
-
-const ROLE_OPTIONS = [
-  'CEO',
-  'Growth Marketer',
-  'Software Engineer',
-  'Product / Project Manager',
-]
-
-const TEAM_SIZE_OPTIONS = [
-  'Solo founder',
-  '2-10',
-  'More than 10',
-]
-
-function OptionGroup({
-  legend,
-  name,
-  options,
-}: {
-  legend: string
-  name: keyof SurveyFormValues
+type Question = {
+  key: keyof SurveyFormValues
+  title: string
   options: string[]
-}) {
-  return (
-    <fieldset className="space-y-3">
-      <legend className="text-sm font-semibold text-foreground">{legend}</legend>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {options.map((option) => (
-          <label
-            key={option}
-            className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-background px-3 py-3 text-sm text-foreground transition-colors hover:border-primary/50"
-          >
-            <input
-              type="radio"
-              name={name}
-              value={option}
-              className="mt-0.5 h-4 w-4 border-border text-primary focus:ring-primary"
-              required
-            />
-            <span className="leading-5">{option}</span>
-          </label>
-        ))}
-      </div>
-    </fieldset>
-  )
+}
+
+const QUESTIONS: Question[] = [
+  {
+    key: 'heardFrom',
+    title: 'Where did you hear about ILoveUGC?',
+    options: [
+      'Instagram',
+      'Tiktok',
+      'Reddit',
+      'Youtube',
+      'X (formerly Twitter)',
+      'Search Engine',
+      'AI recommendation',
+      'A friend',
+      'Other',
+    ],
+  },
+  {
+    key: 'ugcType',
+    title: 'What type of UGC videos do you intend to make?',
+    options: [
+      'Videos for my software startup',
+      'Videos for my ecommerce brand',
+      'Generic lifestyle videos',
+      'Others',
+    ],
+  },
+  {
+    key: 'role',
+    title: 'Role',
+    options: [
+      'CEO',
+      'Growth Marketer',
+      'Software Engineer',
+      'Product / Project Manager',
+      'Other'
+    ],
+  },
+  {
+    key: 'teamSize',
+    title: 'Team size',
+    options: [
+      'Solo founder',
+      '2-10',
+      'More than 10',
+    ],
+  },
+]
+
+const INITIAL_VALUES: SurveyFormValues = {
+  heardFrom: '',
+  ugcType: '',
+  role: '',
+  teamSize: '',
 }
 
 export default function OnboardingSurveyModal({
@@ -83,65 +81,111 @@ export default function OnboardingSurveyModal({
   isLoading,
   onSubmit,
 }: OnboardingSurveyModalProps) {
-  async function handleSubmit(formData: FormData) {
-    await onSubmit({
-      heardFrom: String(formData.get('heardFrom') ?? ''),
-      ugcType: String(formData.get('ugcType') ?? ''),
-      role: String(formData.get('role') ?? ''),
-      teamSize: String(formData.get('teamSize') ?? ''),
-    })
+  const [step, setStep] = useState(0)
+  const [values, setValues] = useState<SurveyFormValues>(INITIAL_VALUES)
+
+  const question = QUESTIONS[step]
+  const selectedValue = values[question.key]
+  const isLastStep = step === QUESTIONS.length - 1
+  const canContinue = selectedValue.length > 0
+  const progressWidth = useMemo(
+    () => `${((step + 1) / QUESTIONS.length) * 100}%`,
+    [step],
+  )
+
+  async function handleContinue() {
+    if (!canContinue || isLoading) return
+
+    if (!isLastStep) {
+      setStep((currentStep) => currentStep + 1)
+      return
+    }
+
+    await onSubmit(values)
+  }
+
+  function handleBack() {
+    if (step === 0 || isLoading) return
+    setStep((currentStep) => currentStep - 1)
+  }
+
+  function handleSelect(option: string) {
+    setValues((currentValues) => ({
+      ...currentValues,
+      [question.key]: option,
+    }))
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/45 px-4 py-8 backdrop-blur-sm">
-      <div className="max-h-full w-full max-w-3xl overflow-y-auto rounded-2xl bg-card">
+      <div className="w-full max-w-2xl rounded-2xl bg-card shadow-2xl">
         <div className="border-b border-border px-6 py-5">
-          <h2 className="text-xl font-semibold text-foreground">Tell us about your team</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Complete this once to continue into ILoveUGC.
-          </p>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Step {step + 1} / {QUESTIONS.length}
+              </p>
+              <h2 className="mt-1 text-xl font-semibold text-foreground">Tell us about your team</h2>
+            </div>
+            <div className="h-2 w-28 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-200"
+                style={{ width: progressWidth }}
+              />
+            </div>
+          </div>
         </div>
 
-        <form
-          action={handleSubmit}
-          className="space-y-6 px-6 py-6"
-        >
-          <OptionGroup
-            legend="Where did you hear about ILoveUGC?"
-            name="heardFrom"
-            options={HEARD_FROM_OPTIONS}
-          />
+        <div className="space-y-5 px-6 py-5">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-foreground">{question.title}</h3>
+            <p className="text-sm text-muted-foreground">
+              Complete this once to continue into ILoveUGC.
+            </p>
+          </div>
 
-          <OptionGroup
-            legend="What type of UGC videos do you intend to make?"
-            name="ugcType"
-            options={UGC_TYPE_OPTIONS}
-          />
+          <div className="grid gap-2 sm:grid-cols-2">
+            {question.options.map((option) => {
+              const isSelected = selectedValue === option
 
-          <OptionGroup
-            legend="Role"
-            name="role"
-            options={ROLE_OPTIONS}
-          />
-
-          <OptionGroup
-            legend="Team size"
-            name="teamSize"
-            options={TEAM_SIZE_OPTIONS}
-          />
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => handleSelect(option)}
+                  className={`flex items-start rounded-lg border px-3.5 py-2.5 text-left text-sm transition-colors ${isSelected
+                    ? 'border-primary bg-primary/8 text-foreground'
+                    : 'border-border bg-background text-foreground hover:border-primary/50'
+                    }`}
+                >
+                  <span className="leading-5">{option}</span>
+                </button>
+              )
+            })}
+          </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <div className="flex justify-end border-t border-border pt-5">
+          <div className="flex items-center justify-between border-t border-border pt-4">
             <button
-              type="submit"
-              disabled={isLoading}
+              type="button"
+              onClick={handleBack}
+              disabled={step === 0 || isLoading}
+              className="inline-flex min-w-24 items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Back
+            </button>
+
+            <button
+              type="button"
+              onClick={handleContinue}
+              disabled={!canContinue || isLoading}
               className="inline-flex min-w-36 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isLoading ? 'Saving...' : 'Continue'}
+              {isLoading ? 'Saving...' : isLastStep ? 'Submit' : 'Continue'}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )
