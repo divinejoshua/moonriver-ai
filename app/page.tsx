@@ -86,6 +86,7 @@ export default function Home() {
   const [surveyStatus, setSurveyStatus] = useState<'idle' | 'loading' | 'incomplete' | 'complete'>('idle')
   const [surveyError, setSurveyError] = useState<string | null>(null)
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false)
+  const [modalInitialUrl, setModalInitialUrl] = useState('')
   const didAutoGenerate = useRef(false)
   const wasSignedIn = useRef<boolean | null>(null)
 
@@ -137,6 +138,14 @@ export default function Home() {
         setSurveyStatus('incomplete')
       })
   }, [isLoaded, isSignedIn, isUserLoaded, user])
+
+  useEffect(() => {
+    if (surveyStatus === 'incomplete' && url) {
+      setModalInitialUrl(url)
+      setUrl('')
+      sessionStorage.removeItem(PENDING_URL_KEY)
+    }
+  }, [surveyStatus, url])
 
   // Auto-generate after sign-in if the user had typed a URL and has paid
   useEffect(() => {
@@ -522,6 +531,7 @@ export default function Home() {
           error={surveyError}
           isLoading={isSubmittingSurvey}
           onSubmit={handleSurveySubmit}
+          initialUrl={modalInitialUrl}
           onComplete={(url) => {
             setSurveyStatus('complete')
             if (url) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 
 type SurveyFormValues = {
   heardFrom: string
@@ -14,6 +14,7 @@ type OnboardingSurveyModalProps = {
   isLoading: boolean
   onSubmit: (values: SurveyFormValues) => Promise<boolean>
   onComplete: (url?: string) => void
+  initialUrl?: string
 }
 
 type Question = {
@@ -82,12 +83,19 @@ export default function OnboardingSurveyModal({
   isLoading,
   onSubmit,
   onComplete,
+  initialUrl = '',
 }: OnboardingSurveyModalProps) {
   const [step, setStep] = useState(0)
   const [values, setValues] = useState<SurveyFormValues>(INITIAL_VALUES)
   
-  const [url, setUrl] = useState('')
+  const [url, setUrl] = useState(initialUrl)
   const [urlError, setUrlError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (initialUrl) {
+      setUrl(initialUrl)
+    }
+  }, [initialUrl])
 
   const isGenerateStep = step === QUESTIONS.length
   const question = !isGenerateStep ? QUESTIONS[step] : null
