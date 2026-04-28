@@ -196,9 +196,10 @@ export default function Home() {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error ?? 'Failed to save survey')
-      setSurveyStatus('complete')
+      return true
     } catch (err) {
       setSurveyError(err instanceof Error ? err.message : 'Failed to save survey')
+      return false
     } finally {
       setIsSubmittingSurvey(false)
     }
@@ -521,6 +522,12 @@ export default function Home() {
           error={surveyError}
           isLoading={isSubmittingSurvey}
           onSubmit={handleSurveySubmit}
+          onComplete={(url) => {
+            setSurveyStatus('complete')
+            if (url) {
+              handleGenerate(url)
+            }
+          }}
         />
       )}
     </div>

@@ -12,7 +12,8 @@ type SurveyFormValues = {
 type OnboardingSurveyModalProps = {
   error: string | null
   isLoading: boolean
-  onSubmit: (values: SurveyFormValues) => Promise<void>
+  onSubmit: (values: SurveyFormValues) => Promise<boolean>
+  onComplete: (url?: string) => void
 }
 
 type Question = {
@@ -80,28 +81,52 @@ export default function OnboardingSurveyModal({
   error,
   isLoading,
   onSubmit,
+  onComplete,
 }: OnboardingSurveyModalProps) {
   const [step, setStep] = useState(0)
   const [values, setValues] = useState<SurveyFormValues>(INITIAL_VALUES)
+  
+  const [url, setUrl] = useState('')
+  const [urlError, setUrlError] = useState<string | null>(null)
 
-  const question = QUESTIONS[step]
-  const selectedValue = values[question.key]
-  const isLastStep = step === QUESTIONS.length - 1
-  const canContinue = selectedValue.length > 0
+  const isGenerateStep = step === QUESTIONS.length
+  const question = !isGenerateStep ? QUESTIONS[step] : null
+  const selectedValue = !isGenerateStep ? values[question!.key] : ''
+  const isLastQuestionStep = step === QUESTIONS.length - 1
+  const canContinue = !isGenerateStep ? selectedValue.length > 0 : true
+  
+  const TOTAL_STEPS = QUESTIONS.length + 1
   const progressWidth = useMemo(
-    () => `${((step + 1) / QUESTIONS.length) * 100}%`,
+    () => `${((step + 1) / TOTAL_STEPS) * 100}%`,
     [step],
   )
+
+  const URL_REGEX = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/
+
+  function validateUrl(raw: string): boolean {
+    if (!raw.trim()) {
+      setUrlError('Please enter a URL')
+      return false
+    }
+    if (!URL_REGEX.test(raw.trim())) {
+      setUrlError('Please enter a valid website (e.g. yourproduct.com)')
+      return false
+    }
+    return true
+  }
 
   async function handleContinue() {
     if (!canContinue || isLoading) return
 
-    if (!isLastStep) {
+    if (!isLastQuestionStep) {
       setStep((currentStep) => currentStep + 1)
       return
     }
 
-    await onSubmit(values)
+    const success = await onSubmit(values)
+    if (success) {
+      setStep(TOTAL_STEPS - 1)
+    }
   }
 
   function handleBack() {
@@ -110,10 +135,17 @@ export default function OnboardingSurveyModal({
   }
 
   function handleSelect(option: string) {
+    if (isGenerateStep) return
     setValues((currentValues) => ({
       ...currentValues,
-      [question.key]: option,
+      [question!.key]: option,
     }))
+  }
+
+  function handleGenerate() {
+    if (validateUrl(url)) {
+      onComplete(url)
+    }
   }
 
   return (
@@ -123,7 +155,7 @@ export default function OnboardingSurveyModal({
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                Step {step + 1} / {QUESTIONS.length}
+                Step {step + 1} / {TOTAL_STEPS}
               </p>
             </div>
             <div className="h-2 w-28 overflow-hidden rounded-full bg-muted">
@@ -136,54 +168,103 @@ export default function OnboardingSurveyModal({
         </div>
 
         <div className="space-y-5 px-6 py-5">
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-foreground">{question.title}</h3>
-            <p className="text-sm text-muted-foreground">
-              Complete this once to continue into ILoveUGC.
-            </p>
-          </div>
+          {!isGenerateStep && question ? (
+            <>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-foreground">{question.title}</h3>
+                <p className="text-sm text-muted-foreground">
+                  Complete this once to continue into ILoveUGC.
+                </p>
+              </div>
 
-          <div className="grid gap-2 sm:grid-cols-2">
-            {question.options.map((option) => {
-              const isSelected = selectedValue === option
+              <div className="grid gap-2 sm:grid-cols-2">
+                {question.options.map((option) => {
+                  const isSelected = selectedValue === option
 
-              return (
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => handleSelect(option)}
+                      className={`flex items-start rounded-lg border px-3.5 py-2.5 text-left text-sm transition-colors ${isSelected
+                        ? 'border-primary bg-primary/8 text-foreground'
+                        : 'border-border bg-background text-foreground hover:border-primary/50'
+                        }`}
+                    >
+                      <span className="leading-5">{option}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
+
+              <div className="flex items-center justify-between border-t border-border pt-4">
                 <button
-                  key={option}
                   type="button"
-                  onClick={() => handleSelect(option)}
-                  className={`flex items-start rounded-lg border px-3.5 py-2.5 text-left text-sm transition-colors ${isSelected
-                    ? 'border-primary bg-primary/8 text-foreground'
-                    : 'border-border bg-background text-foreground hover:border-primary/50'
-                    }`}
+                  onClick={handleBack}
+                  disabled={step === 0 || isLoading}
+                  className="inline-flex min-w-24 items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <span className="leading-5">{option}</span>
+                  Back
                 </button>
-              )
-            })}
-          </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+                <button
+                  type="button"
+                  onClick={handleContinue}
+                  disabled={!canContinue || isLoading}
+                  className="inline-flex min-w-36 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isLoading ? 'Saving...' : isLastQuestionStep ? 'Submit' : 'Continue'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-foreground">Create your first UGC video</h3>
+                <p className="text-sm text-muted-foreground">
+                  Paste your product link below to start generating a video.
+                </p>
+              </div>
 
-          <div className="flex items-center justify-between border-t border-border pt-4">
-            <button
-              type="button"
-              onClick={handleBack}
-              disabled={step === 0 || isLoading}
-              className="inline-flex min-w-24 items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Back
-            </button>
+              <div className={`flex items-center bg-card border rounded-xl shadow-sm overflow-hidden focus-within:ring-1 focus-within:border-ring focus-within:ring-ring ${urlError ? 'border-destructive' : 'border-border'}`}>
+                <span className="pl-4 pr-2 text-sm text-muted-foreground select-none whitespace-nowrap">https://</span>
+                <input
+                  type="text"
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value.replace(/^https?:\/\//i, '').replace(/^www\./i, 'www.'))
+                    setUrlError(null)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleGenerate()
+                  }}
+                  placeholder="yourproduct.com"
+                  className="flex-1 bg-transparent py-3.5 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm"
+                />
+              </div>
+              {urlError && <p className="text-sm text-destructive">{urlError}</p>}
 
-            <button
-              type="button"
-              onClick={handleContinue}
-              disabled={!canContinue || isLoading}
-              className="inline-flex min-w-36 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isLoading ? 'Saving...' : isLastStep ? 'Submit' : 'Continue'}
-            </button>
-          </div>
+              <div className="flex items-center justify-between border-t border-border pt-4">
+                <button
+                  type="button"
+                  onClick={() => onComplete()}
+                  className="inline-flex min-w-24 items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                >
+                  Skip
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  className="inline-flex min-w-36 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  Generate Video
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
