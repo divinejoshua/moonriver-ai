@@ -30,7 +30,7 @@ export async function GET() {
     limit = paidCount * 5
     isPaid = true
   } else {
-    limit = 1
+    limit = 0
     isPaid = false
   }
 

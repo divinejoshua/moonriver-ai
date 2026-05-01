@@ -12,7 +12,7 @@ export default function PricingPage() {
         <div className="text-center space-y-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Pricing</p>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Simple, transparent pricing</h1>
-          <p className="text-sm text-muted-foreground">Start free · upgrade anytime · cancel anytime</p>
+          <p className="text-sm text-muted-foreground">Upgrade anytime · cancel anytime</p>
         </div>
 
         <PricingTable />

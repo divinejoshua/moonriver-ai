@@ -58,7 +58,7 @@ const FAQS = [
   },
   {
     q: 'How many videos do I get?',
-    a: 'You get 1 free video to try it out — no credit card needed. The Starter pack ($49) includes 5 videos, and the Growth pack ($119) includes 15 videos.',
+    a: 'The Starter pack ($49) includes 5 videos, and the Growth pack ($119) includes 15 videos.',
   },
 ]
 

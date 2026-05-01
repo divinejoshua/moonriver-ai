@@ -23,17 +23,7 @@ export async function POST(
     const isFree = !hasGrowth && !hasBasic && paidCount === 0
 
     if (isFree) {
-      // Free users get one video. If they've already generated another project, require a subscription.
-      const { count: prevGenerated } = await supabase
-        .from('projects')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .neq('id', id)
-        .neq('status', 'draft')
-
-      if ((prevGenerated ?? 0) >= 1) {
-        return Response.json({ error: 'Subscription required', notPaid: true }, { status: 403 })
-      }
+      return Response.json({ error: 'Subscription required', notPaid: true }, { status: 403 })
     } else {
       let effectiveLimit: number
       if (hasGrowth) effectiveLimit = 25
