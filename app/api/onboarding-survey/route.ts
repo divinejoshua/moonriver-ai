@@ -1,38 +1,11 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { appendSurveySubmission } from '@/lib/google-sheets'
-
-const HEARD_FROM_OPTIONS = [
-  'Instagram',
-  'Tiktok',
-  'Reddit',
-  'Youtube',
-  'X (formerly Twitter)',
-  'Search Engine',
-  'AI recommendation',
-  'A friend',
-  'Other',
-] as const
-
-const UGC_TYPE_OPTIONS = [
-  'Videos for my software startup',
-  'Videos for my ecommerce brand',
-  'Generic lifestyle videos',
-  'Others',
-] as const
-
-const ROLE_OPTIONS = [
-  'CEO',
-  'Growth Marketer',
-  'Software Engineer',
-  'Product / Project Manager',
-  'Other',
-] as const
-
-const TEAM_SIZE_OPTIONS = [
-  'Solo founder',
-  '2-10',
-  'More than 10',
-] as const
+import {
+  ONBOARDING_SURVEY_HEARD_FROM_OPTIONS,
+  ONBOARDING_SURVEY_UGC_TYPE_OPTIONS,
+  ONBOARDING_SURVEY_ROLE_OPTIONS,
+  ONBOARDING_SURVEY_TEAM_SIZE_OPTIONS,
+} from '@/lib/constants'
 
 type SurveyPayload = {
   heardFrom?: string
@@ -64,19 +37,19 @@ export async function POST(request: Request) {
 
   const payload = await request.json() as SurveyPayload
 
-  if (!isAllowedOption(payload.heardFrom, HEARD_FROM_OPTIONS)) {
+  if (!isAllowedOption(payload.heardFrom, ONBOARDING_SURVEY_HEARD_FROM_OPTIONS)) {
     return Response.json({ error: 'Please select where you heard about IloveUGC.' }, { status: 400 })
   }
 
-  if (!isAllowedOption(payload.ugcType, UGC_TYPE_OPTIONS)) {
+  if (!isAllowedOption(payload.ugcType, ONBOARDING_SURVEY_UGC_TYPE_OPTIONS)) {
     return Response.json({ error: 'Please select the type of UGC videos you intend to make.' }, { status: 400 })
   }
 
-  if (!isAllowedOption(payload.role, ROLE_OPTIONS)) {
+  if (!isAllowedOption(payload.role, ONBOARDING_SURVEY_ROLE_OPTIONS)) {
     return Response.json({ error: 'Please select your role.' }, { status: 400 })
   }
 
-  if (!isAllowedOption(payload.teamSize, TEAM_SIZE_OPTIONS)) {
+  if (!isAllowedOption(payload.teamSize, ONBOARDING_SURVEY_TEAM_SIZE_OPTIONS)) {
     return Response.json({ error: 'Please select your team size.' }, { status: 400 })
   }
 

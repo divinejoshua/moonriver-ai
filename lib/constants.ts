@@ -14,6 +14,41 @@ export const AVATARS = [
   { id: 12, name: 'Elena', src: '/avatars/13.jpeg' },
 ] as const
 
+export const ONBOARDING_SURVEY_HEARD_FROM_OPTIONS = [
+  'Instagram',
+  'Tiktok',
+  'Reddit',
+  'Youtube',
+  'X (formerly Twitter)',
+  'Search Engine',
+  'AI recommendation',
+  'A friend',
+  'Facebook',
+  'Other',
+] as const
+
+export const ONBOARDING_SURVEY_UGC_TYPE_OPTIONS = [
+  'Videos for a tech product',
+  'Videos for a fashion brand',
+  'Videos for a physical product',
+  'Generic lifestyle videos',
+  'Others',
+] as const
+
+export const ONBOARDING_SURVEY_ROLE_OPTIONS = [
+  'CEO',
+  'Growth Marketer',
+  'Software Engineer',
+  'Product / Project Manager',
+  'Other',
+] as const
+
+export const ONBOARDING_SURVEY_TEAM_SIZE_OPTIONS = [
+  'Solo founder',
+  '2-10',
+  'More than 10',
+] as const
+
 export const AVATAR_VOICE_MAP: Record<number, string> = {
   0: 'rdDUoCO1RjwdMmNjmhHV',  // Marcus (M)
   1: 'kXsOSDWolD7e9l1Z0sbH',  // Sophie (F)

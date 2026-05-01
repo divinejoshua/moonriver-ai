@@ -1,6 +1,12 @@
 'use client'
 
 import { useMemo, useState, useEffect } from 'react'
+import {
+  ONBOARDING_SURVEY_HEARD_FROM_OPTIONS,
+  ONBOARDING_SURVEY_UGC_TYPE_OPTIONS,
+  ONBOARDING_SURVEY_ROLE_OPTIONS,
+  ONBOARDING_SURVEY_TEAM_SIZE_OPTIONS,
+} from '@/lib/constants'
 
 type SurveyFormValues = {
   heardFrom: string
@@ -27,47 +33,22 @@ const QUESTIONS: Question[] = [
   {
     key: 'heardFrom',
     title: 'Where did you hear about ILoveUGC?',
-    options: [
-      'Instagram',
-      'Tiktok',
-      'Reddit',
-      'Youtube',
-      'X (formerly Twitter)',
-      'Search Engine',
-      'AI recommendation',
-      'A friend',
-      'Other',
-    ],
+    options: [...ONBOARDING_SURVEY_HEARD_FROM_OPTIONS],
   },
   {
     key: 'ugcType',
     title: 'What type of UGC videos do you intend to make?',
-    options: [
-      'Videos for my software startup',
-      'Videos for my ecommerce brand',
-      'Generic lifestyle videos',
-      'Others',
-    ],
+    options: [...ONBOARDING_SURVEY_UGC_TYPE_OPTIONS],
   },
   {
     key: 'role',
     title: 'Role',
-    options: [
-      'CEO',
-      'Growth Marketer',
-      'Software Engineer',
-      'Product / Project Manager',
-      'Other'
-    ],
+    options: [...ONBOARDING_SURVEY_ROLE_OPTIONS],
   },
   {
     key: 'teamSize',
     title: 'Team size',
-    options: [
-      'Solo founder',
-      '2-10',
-      'More than 10',
-    ],
+    options: [...ONBOARDING_SURVEY_TEAM_SIZE_OPTIONS],
   },
 ]
 
