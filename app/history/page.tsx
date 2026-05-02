@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import Header from '@/app/components/Header'
 import { AVATARS } from '@/lib/constants'
@@ -106,24 +107,38 @@ export default function HistoryPage() {
                 month: 'short', day: 'numeric', year: 'numeric',
               })
 
+              const projectHref =
+                project.status === 'done'
+                  ? `/projects/${project.id}/generating`
+                  : `/projects/${project.id}`
+
               return (
                 <div
                   key={project.id}
-                  className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm flex flex-col"
+                  className="group relative bg-card border border-border rounded-2xl overflow-hidden shadow-sm flex flex-col hover:border-foreground/20 transition-colors"
+                  onMouseEnter={(e) => e.currentTarget.querySelector('video')?.play().catch(() => {})}
+                  onMouseLeave={(e) => {
+                    const v = e.currentTarget.querySelector('video')
+                    if (v) { v.pause(); v.currentTime = 0 }
+                  }}
                 >
+                  <Link
+                    href={projectHref}
+                    aria-label={`Open project ${project.url}`}
+                    className="absolute inset-0 z-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  />
+
                   {/* Video / placeholder */}
                   {project.status === 'done' && project.final_video_url ? (
                     <video
                       src={project.final_video_url}
-                      className="w-full aspect-[9/16] object-cover bg-muted"
+                      className="w-full aspect-[9/16] object-cover bg-muted pointer-events-none"
                       muted
                       loop
                       playsInline
-                      onMouseEnter={(e) => e.currentTarget.play()}
-                      onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0 }}
                     />
                   ) : (
-                    <div className="w-full aspect-[9/16] bg-muted flex flex-col items-center justify-center gap-2">
+                    <div className="w-full aspect-[9/16] bg-muted flex flex-col items-center justify-center gap-2 pointer-events-none">
                       {project.status === 'generating' && (
                         <div className="w-7 h-7 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                       )}
@@ -142,10 +157,10 @@ export default function HistoryPage() {
                   )}
 
                   {/* Card footer */}
-                  <div className="px-4 py-3 flex flex-col gap-2">
+                  <div className="px-4 py-3 flex flex-col gap-2 pointer-events-none">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{project.url}</p>
+                        <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{project.url}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">{avatar.name} · {date}</p>
                       </div>
                       <StatusBadge status={project.status} />
@@ -155,21 +170,14 @@ export default function HistoryPage() {
                       {project.status === 'done' && project.final_video_url && (
                         <button
                           onClick={() => downloadVideo(project.final_video_url!)}
-                          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+                          className="relative z-10 pointer-events-auto text-xs font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
                         >
                           Download
                         </button>
                       )}
-                      <button
-                        onClick={() => router.push(
-                          project.status === 'done'
-                            ? `/projects/${project.id}/generating`
-                            : `/projects/${project.id}`
-                        )}
-                        className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors ml-auto cursor-pointer"
-                      >
+                      <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors ml-auto">
                         {project.status === 'done' ? 'View' : 'Open'}
-                      </button>
+                      </span>
                     </div>
                   </div>
                 </div>
